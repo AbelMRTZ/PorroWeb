@@ -1,0 +1,413 @@
+/* ── Header ── */
+.premios-header {
+  position: relative;
+}
+
+.premios-trophy {
+  font-size: 3.5rem;
+  color: var(--gold);
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 20px var(--gold-glow));
+}
+
+/* ── Year tabs ── */
+.year-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.year-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all var(--transition);
+}
+
+.year-btn:hover {
+  border-color: var(--gold);
+  color: var(--text);
+}
+
+.year-btn.active {
+  background: var(--gold-glow);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.year-btn-global {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+.year-btn-global:hover {
+  border-color: var(--purple-light);
+  color: var(--text);
+}
+
+.year-btn-global.active {
+  background: var(--purple-glow);
+  border-color: var(--purple-light);
+  color: var(--purple-light);
+  box-shadow: 0 0 16px var(--purple-glow);
+}
+
+/* ── Edition heading ── */
+.edition-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.edition-heading h2 {
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── Categories grid ── */
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.categoria-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.categoria-card:hover {
+  border-color: var(--gold-dark);
+  transform: translateY(-2px);
+}
+
+.categoria-header {
+  background: linear-gradient(135deg, var(--bg-surface2), #1a1030);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.categoria-nombre {
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  flex: 1;
+}
+
+.categoria-votos {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.categoria-winner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.winner-trophy {
+  font-size: 1.5rem;
+  color: var(--gold);
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px var(--gold-glow));
+}
+
+.winner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.winner-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.winner-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.categoria-nominados {
+  padding: 14px 20px;
+}
+
+.nominados-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.nominados-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nominado {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nominado-winner {
+  color: var(--gold-light);
+}
+
+.nominado-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nominado-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nominado-text {
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.nominado-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+
+.nominado-winner .nominado-pct {
+  color: var(--gold);
+}
+
+.nominado-bar-wrap {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.nominado-bar {
+  height: 100%;
+  background: rgba(160, 160, 220, 0.45);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.nominado-bar-winner {
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+}
+
+.nom-star {
+  color: var(--gold);
+  font-size: 0.65rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Global stats ── */
+.global-stats {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stats-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stats-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.stats-panel-champion {
+  grid-column: 1 / -1;
+}
+
+.stats-panel-title {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.stats-panel-title .fa-trophy { color: var(--gold); }
+.stats-panel-title .fa-star   { color: var(--purple-light); }
+.stats-panel-title .fa-crown  { color: var(--gold); }
+
+/* Leaderboard */
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.lb-first .lb-pos  { color: var(--gold); font-weight: 700; }
+.lb-first .lb-name { color: var(--gold-light); font-weight: 600; }
+.lb-first .lb-count { color: var(--gold); }
+
+.lb-first-purple .lb-pos  { color: var(--purple-light); }
+.lb-first-purple .lb-name { color: var(--purple-light); }
+.lb-first-purple .lb-count { color: var(--purple-light); }
+
+.lb-pos {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-align: center;
+}
+
+.lb-name {
+  font-size: 0.875rem;
+}
+
+.lb-bar-wrap {
+  background: var(--border);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.lb-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.lb-bar-purple {
+  background: linear-gradient(90deg, var(--purple-dark), var(--purple-light));
+}
+
+.lb-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* Champions per year */
+.champions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.champion-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.champion-year {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 44px;
+}
+
+.champion-trophy {
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.champion-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.champion-wins {
+  font-size: 0.65rem;
+}
+
+@media (max-width: 700px) {
+  .stats-panels {
+    grid-template-columns: 1fr;
+  }
+  .stats-panel-champion {
+    grid-column: 1;
+  }
+  .lb-row {
+    grid-template-columns: 20px 1fr auto;
+  }
+  .lb-bar-wrap {
+    display: none;
+  }
+  .champions-list {
+    grid-template-columns: 1fr;
+  }
+}
