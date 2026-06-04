@@ -10,9 +10,13 @@ import Porrolimpiadas from './pages/Porrolimpiadas'
 import PremiosPorro from './pages/PremiosPorro'
 import Fantasy from './pages/Fantasy'
 import Galeria from './pages/Galeria'
+import Admin from './pages/Admin'
+import RequireAdmin from './components/RequireAdmin'
 
 function App() {
-  const { user } = useAuth()
+  const { user, authLoading } = useAuth()
+
+  if (authLoading) return null
 
   return (
     <div className="app">
@@ -30,6 +34,8 @@ function App() {
           <Route path="/fantasy" element={<RequireAuth><Fantasy /></RequireAuth>} />
           <Route path="/galeria" element={<RequireAuth><Galeria /></RequireAuth>} />
           <Route path="/galeria/:tripSlug" element={<RequireAuth><Galeria /></RequireAuth>} />
+
+          <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

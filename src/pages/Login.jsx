@@ -24,10 +24,13 @@ export default function Login() {
   const [error, setError]             = useState('')
   const [loading, setLoading]         = useState(false)
 
-  function pickUser(u) {
+  async function pickUser(u) {
     setSelectedUser(u)
     setPassword(''); setConfirm(''); setError('')
-    setStep(hasPassword(u.id) ? STEP.ENTER : STEP.NEW)
+    setLoading(true)
+    const has = await hasPassword(u.id)
+    setLoading(false)
+    setStep(has ? STEP.ENTER : STEP.NEW)
   }
 
   function back() {
@@ -38,11 +41,12 @@ export default function Login() {
 
   async function handleNew(e) {
     e.preventDefault()
-    if (password.length < 4) { setError('La contraseña debe tener al menos 4 caracteres.'); return }
+    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
     if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
     setLoading(true)
-    await setupPassword(selectedUser.id, password)
+    const result = await setupPassword(selectedUser.id, password)
     setLoading(false)
+    if (!result.ok) { setError(result.error); return }
     navigate(from, { replace: true })
   }
 
@@ -123,7 +127,7 @@ export default function Login() {
                   onChange={e => { setPassword(e.target.value); setError('') }}
                   show={showPwd}
                   onToggle={() => setShowPwd(v => !v)}
-                  placeholder="Mínimo 4 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                   autoFocus
                 />
               </div>

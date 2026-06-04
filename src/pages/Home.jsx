@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { RobotSpline } from '../components/RobotSpline'
 import './Home.css'
 
 const TABS = ['Inicio', 'Actualidad', 'Accesos Rápidos']
+const ROBOT_SCENE = 'https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('Inicio')
@@ -12,6 +14,9 @@ export default function Home() {
       <section className="hero">
         <div className="hero-glow hero-glow-left" />
         <div className="hero-glow hero-glow-right" />
+        <div className="hero-robot-wrap" aria-hidden="true">
+          <RobotSpline scene={ROBOT_SCENE} />
+        </div>
         <div className="hero-content">
           <i className="fa-solid fa-smoking hero-icon" aria-hidden="true" />
           <h1 className="hero-title">La Revolución del Porro</h1>
@@ -51,8 +56,7 @@ function TabInicio() {
           <h3>Bienvenido al Portal</h3>
           <p>
             Este es el espacio digital de La Revolución del Porro. Aquí encontrarás todo lo
-            relacionado con el grupo: los Premios Porro, las Porrolimpiadas, el Fantasy
-            y la galería de recuerdos.
+            relacionado con el grupo: los Premios Porro, las Porrolimpiadas, el Fantasy, la galería de recuerdos y más...
           </p>
         </div>
       </div>
@@ -66,15 +70,15 @@ function TabInicio() {
           <li className="event-item">
             <span className="event-dot" />
             <div>
-              <span className="event-name">Porrolimpiadas 2025</span>
-              <span className="event-date">Próximamente</span>
+              <span className="event-name">Porrolimpiadas 2026</span>
+              <span className="event-date">19 de Julio (9:30)</span>
             </div>
           </li>
           <li className="event-item">
             <span className="event-dot" />
             <div>
               <span className="event-name">Premios Porro 2026</span>
-              <span className="event-date">Próximamente</span>
+              <span className="event-date">31 de Diciembre</span>
             </div>
           </li>
           <li className="event-item">
@@ -98,11 +102,11 @@ function TabInicio() {
             <span className="stat-label">Ediciones de Premios</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number purple">6</span>
+            <span className="stat-number purple">18</span>
             <span className="stat-label">Miembros</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number gold">5</span>
+            <span className="stat-number gold">0</span>
             <span className="stat-label">Viajes en Galería</span>
           </div>
           <div className="stat-item">
@@ -195,7 +199,7 @@ function TabAccesos() {
       icon: 'camera',
       titulo: 'Galería',
       desc: 'Fotos de todos los viajes y momentos del grupo. 5 álbumes disponibles.',
-      badge: '5 álbumes',
+      badge: '0 álbumes',
     },
   ]
 

@@ -1,81 +1,65 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { galeriaData } from '../data/galeriaData'
+import { loadTrips } from '../data/tripsStore'
+import { loadPhotosForTrip, uploadPhoto, deletePhoto, getPhotoUrl } from '../data/galleryStore'
 import { useAuth } from '../context/AuthContext'
 import './Galeria.css'
 
-const STORAGE_KEY = 'porro_gallery'
-
-function loadGallery() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
-  catch { return {} }
-}
-
-function saveGallery(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  } catch (e) {
-    if (e.name === 'QuotaExceededError') throw new Error('storage_full')
-    throw e
-  }
-}
-
-function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = reject
-    reader.onload = (ev) => {
-      const img = new Image()
-      img.onerror = reject
-      img.onload = () => {
-        const MAX = 1400
-        let { width, height } = img
-        if (width > MAX || height > MAX) {
-          const r = Math.min(MAX / width, MAX / height)
-          width = Math.round(width * r)
-          height = Math.round(height * r)
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.82))
-      }
-      img.src = ev.target.result
-    }
-    reader.readAsDataURL(file)
-  })
+function fechaYear(fecha) {
+  return fecha ? String(fecha).slice(0, 4) : ''
 }
 
 export default function Galeria() {
   const { tripSlug } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const fileInputRef = useRef(null)
 
-  const [gallery, setGallery] = useState(loadGallery)
+  const [trips, setTrips] = useState([])
+  const [tripsLoading, setTripsLoading] = useState(true)
+  const [photos, setPhotos] = useState([])
+  const [photosLoading, setPhotosLoading] = useState(false)
   const [lightbox, setLightbox] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
-  const currentTrip = galeriaData.find(t => t.slug === tripSlug) ?? galeriaData[0]
-  const tripPhotos = gallery[currentTrip.slug] ?? []
-
+  // Load trips once on mount
   useEffect(() => {
-    if (!tripSlug) navigate(`/galeria/${galeriaData[0].slug}`, { replace: true })
-  }, [tripSlug, navigate])
+    loadTrips()
+      .then(setTrips)
+      .finally(() => setTripsLoading(false))
+  }, [])
+
+  // Redirect to first trip when none selected
+  useEffect(() => {
+    if (!tripsLoading && !tripSlug && trips.length > 0) {
+      navigate(`/galeria/${trips[0].slug}`, { replace: true })
+    }
+  }, [tripSlug, trips, tripsLoading, navigate])
+
+  const currentTrip = trips.find(t => t.slug === tripSlug) ?? trips[0]
+
+  // Load photos whenever the active trip changes
+  useEffect(() => {
+    if (!currentTrip) return
+    setPhotosLoading(true)
+    setPhotos([])
+    loadPhotosForTrip(currentTrip.slug)
+      .then(setPhotos)
+      .finally(() => setPhotosLoading(false))
+  }, [currentTrip?.slug])
 
   const navigateLightbox = useCallback((dir) => {
-    if (!lightbox || tripPhotos.length < 2) return
-    const idx = tripPhotos.findIndex(p => p.id === lightbox.id)
-    setLightbox(tripPhotos[(idx + dir + tripPhotos.length) % tripPhotos.length])
-  }, [lightbox, tripPhotos])
+    if (!lightbox || photos.length < 2) return
+    const idx = photos.findIndex(p => p.id === lightbox.id)
+    setLightbox(photos[(idx + dir + photos.length) % photos.length])
+  }, [lightbox, photos])
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape')      setLightbox(null)
-      if (e.key === 'ArrowRight')  navigateLightbox(1)
-      if (e.key === 'ArrowLeft')   navigateLightbox(-1)
+      if (e.key === 'Escape')     setLightbox(null)
+      if (e.key === 'ArrowRight') navigateLightbox(1)
+      if (e.key === 'ArrowLeft')  navigateLightbox(-1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -83,59 +67,57 @@ export default function Galeria() {
 
   async function handleUpload(e) {
     const files = Array.from(e.target.files)
-    if (!files.length) return
+    if (!files.length || !currentTrip) return
 
     setUploading(true)
     setUploadError('')
 
-    const newPhotos = []
     for (const file of files) {
       try {
-        const dataUrl = await compressImage(file)
-        newPhotos.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          dataUrl,
-          name: file.name,
-          uploadedBy: user?.nombre ?? 'Anónimo',
-          uploadedAt: new Date().toISOString(),
-        })
-      } catch { /* skip individual failures */ }
-    }
-
-    try {
-      setGallery(prev => {
-        const updated = {
-          ...prev,
-          [currentTrip.slug]: [...(prev[currentTrip.slug] ?? []), ...newPhotos],
-        }
-        saveGallery(updated)
-        return updated
-      })
-    } catch (err) {
-      setUploadError(
-        err.message === 'storage_full'
-          ? 'Almacenamiento lleno. Elimina algunas fotos para liberar espacio.'
-          : 'Error al guardar las fotos. Inténtalo de nuevo.'
-      )
+        const photo = await uploadPhoto(currentTrip.id, currentTrip.slug, file, user?.nombre ?? 'Anónimo')
+        setPhotos(prev => [...prev, photo])
+      } catch (err) {
+        setUploadError(
+          err.message?.includes('storage')
+            ? 'Error al subir la foto. Inténtalo de nuevo.'
+            : 'Error al guardar la foto. Inténtalo de nuevo.'
+        )
+      }
     }
 
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  function deletePhoto(photoId) {
-    setGallery(prev => {
-      const updated = {
-        ...prev,
-        [currentTrip.slug]: (prev[currentTrip.slug] ?? []).filter(p => p.id !== photoId),
-      }
-      saveGallery(updated)
-      return updated
-    })
-    if (lightbox?.id === photoId) setLightbox(null)
+  async function handleDeletePhoto(photo) {
+    try {
+      await deletePhoto(photo)
+      setPhotos(prev => prev.filter(p => p.id !== photo.id))
+      if (lightbox?.id === photo.id) setLightbox(null)
+    } catch { /* ignore */ }
   }
 
-  const photoCount = (slug) => (gallery[slug] ?? []).length
+  const photoCount = (trip) => {
+    if (trip.slug === currentTrip?.slug) return photos.length
+    return '…'
+  }
+
+  if (tripsLoading) return null
+
+  if (trips.length === 0) {
+    return (
+      <div className="galeria-empty-page">
+        <div className="galeria-empty">
+          <i className="fa-solid fa-images" aria-hidden="true" />
+          <h3>No hay viajes publicados</h3>
+          {isAdmin
+            ? <p>Crea el primer viaje desde el <Link to="/admin">panel de administración</Link>.</p>
+            : <p>Aún no se han publicado viajes. ¡Pronto habrá recuerdos aquí!</p>
+          }
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="galeria-page">
@@ -144,17 +126,17 @@ export default function Galeria() {
       <aside className="galeria-sidebar">
         <h2 className="sidebar-title">Galería</h2>
         <nav className="sidebar-nav">
-          {galeriaData.map(trip => (
+          {trips.map(trip => (
             <Link
               key={trip.slug}
               to={`/galeria/${trip.slug}`}
-              className={`sidebar-item${currentTrip.slug === trip.slug ? ' active' : ''}`}
+              className={`sidebar-item${currentTrip?.slug === trip.slug ? ' active' : ''}`}
             >
               <i className="fa-solid fa-location-dot sidebar-icon" aria-hidden="true" />
               <div className="sidebar-info">
                 <span className="sidebar-name">{trip.nombre}</span>
                 <span className="sidebar-year">
-                  {trip.año} · {photoCount(trip.slug)} fotos
+                  {fechaYear(trip.fecha)} · {photoCount(trip)} fotos
                 </span>
               </div>
             </Link>
@@ -166,11 +148,11 @@ export default function Galeria() {
       <main className="galeria-main">
         <div className="galeria-main-header">
           <div className="galeria-header-left">
-            <h1 className="galeria-trip-title">{currentTrip.nombre}</h1>
+            <h1 className="galeria-trip-title">{currentTrip?.nombre}</h1>
             <p className="galeria-trip-meta muted">
-              {currentTrip.año} · {tripPhotos.length} {tripPhotos.length === 1 ? 'foto' : 'fotos'}
+              {fechaYear(currentTrip?.fecha)} · {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
             </p>
-            {currentTrip.descripcion && (
+            {currentTrip?.descripcion && (
               <p className="galeria-trip-desc muted">{currentTrip.descripcion}</p>
             )}
           </div>
@@ -203,11 +185,16 @@ export default function Galeria() {
           </div>
         )}
 
-        {tripPhotos.length === 0 ? (
+        {photosLoading ? (
+          <div className="galeria-empty">
+            <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" />
+            <h3>Cargando fotos…</h3>
+          </div>
+        ) : photos.length === 0 ? (
           <div className="galeria-empty">
             <i className="fa-solid fa-camera" aria-hidden="true" />
             <h3>Nadie ha subido ninguna foto todavía</h3>
-            <p>¡Sé el primero en añadir recuerdos de <strong>{currentTrip.nombre}</strong>!</p>
+            <p>¡Sé el primero en añadir recuerdos de <strong>{currentTrip?.nombre}</strong>!</p>
             <button
               className="upload-btn"
               onClick={() => fileInputRef.current?.click()}
@@ -218,23 +205,23 @@ export default function Galeria() {
           </div>
         ) : (
           <div className="fotos-grid">
-            {tripPhotos.map(foto => (
+            {photos.map(foto => (
               <div key={foto.id} className="foto-thumb-wrap">
                 <button
                   className="foto-thumb"
                   onClick={() => setLightbox(foto)}
                   aria-label={foto.name}
                 >
-                  <img src={foto.dataUrl} alt={foto.name} className="foto-img" />
+                  <img src={getPhotoUrl(foto.storage_path)} alt={foto.name} className="foto-img" />
                   <span className="foto-overlay">
                     <i className="fa-solid fa-magnifying-glass foto-icon" aria-hidden="true" />
                   </span>
                 </button>
                 <button
                   className="foto-delete"
-                  onClick={() => deletePhoto(foto.id)}
+                  onClick={() => handleDeletePhoto(foto)}
                   aria-label="Eliminar foto"
-                  title={`Subida por ${foto.uploadedBy}`}
+                  title={`Subida por ${foto.uploaded_by}`}
                 >
                   <i className="fa-solid fa-xmark" aria-hidden="true" />
                 </button>
@@ -251,7 +238,7 @@ export default function Galeria() {
             <i className="fa-solid fa-xmark" aria-hidden="true" />
           </button>
 
-          {tripPhotos.length > 1 && (
+          {photos.length > 1 && (
             <button
               className="lb-nav lb-prev"
               onClick={e => { e.stopPropagation(); navigateLightbox(-1) }}
@@ -262,10 +249,10 @@ export default function Galeria() {
           )}
 
           <div className="lb-photo-wrap" onClick={e => e.stopPropagation()}>
-            <img src={lightbox.dataUrl} alt={lightbox.name} className="lb-img" />
+            <img src={getPhotoUrl(lightbox.storage_path)} alt={lightbox.name} className="lb-img" />
           </div>
 
-          {tripPhotos.length > 1 && (
+          {photos.length > 1 && (
             <button
               className="lb-nav lb-next"
               onClick={e => { e.stopPropagation(); navigateLightbox(1) }}
@@ -276,7 +263,7 @@ export default function Galeria() {
           )}
 
           <div className="lb-caption">
-            {currentTrip.nombre} · Subida por {lightbox.uploadedBy}
+            {currentTrip?.nombre} · Subida por {lightbox.uploaded_by}
           </div>
         </div>
       )}

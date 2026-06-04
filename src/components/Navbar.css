@@ -80,6 +80,23 @@
   background: var(--gold-glow);
 }
 
+.nav-link-admin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--purple-light);
+}
+
+.nav-link-admin:hover {
+  color: var(--purple-light);
+  background: rgba(160, 80, 240, 0.1);
+}
+
+.nav-link-admin.active {
+  color: var(--purple-light);
+  background: rgba(160, 80, 240, 0.15);
+}
+
 /* User avatar */
 .navbar-user {
   position: relative;

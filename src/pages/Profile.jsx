@@ -9,7 +9,6 @@ function initials(nombre) {
 export default function Profile() {
   const { user, changePassword } = useAuth()
 
-  const [current, setCurrent] = useState('')
   const [newPwd,  setNewPwd]  = useState('')
   const [confirm, setConfirm] = useState('')
   const [showPwd, setShowPwd] = useState(false)
@@ -18,28 +17,25 @@ export default function Profile() {
   const [loading, setLoading] = useState(false)
 
   function resetForm() {
-    setCurrent(''); setNewPwd(''); setConfirm('')
+    setNewPwd(''); setConfirm('')
     setError(''); setSuccess(false)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(''); setSuccess(false)
-    if (!current)              { setError('Escribe tu contraseña actual.'); return }
-    if (newPwd.length < 4)     { setError('La nueva contraseña debe tener al menos 4 caracteres.'); return }
-    if (newPwd === current)    { setError('La nueva contraseña debe ser diferente a la actual.'); return }
-    if (newPwd !== confirm)    { setError('Las contraseñas nuevas no coinciden.'); return }
+    if (newPwd.length < 6)  { setError('La nueva contraseña debe tener al menos 6 caracteres.'); return }
+    if (newPwd !== confirm)  { setError('Las contraseñas no coinciden.'); return }
 
     setLoading(true)
-    const result = await changePassword(user.id, current, newPwd)
+    const result = await changePassword(newPwd)
     setLoading(false)
 
     if (result.ok) {
       setSuccess(true)
-      setCurrent(''); setNewPwd(''); setConfirm('')
+      setNewPwd(''); setConfirm('')
     } else {
       setError(result.error)
-      setCurrent('')
     }
   }
 
@@ -59,12 +55,12 @@ export default function Profile() {
 
           <div className="profile-info">
             <div className="profile-info-row">
-              <i className="fa-solid fa-shield-halved" aria-hidden="true" />
-              <span>Contraseña almacenada en este dispositivo</span>
+              <i className="fa-solid fa-cloud" aria-hidden="true" />
+              <span>Contraseña almacenada de forma segura en la nube</span>
             </div>
             <div className="profile-info-row">
               <i className="fa-solid fa-circle-info" aria-hidden="true" />
-              <span>Si cambias de dispositivo tendrás que configurar tu contraseña de nuevo</span>
+              <span>Puedes entrar desde cualquier dispositivo con tu contraseña</span>
             </div>
           </div>
         </div>
@@ -79,18 +75,6 @@ export default function Profile() {
             </div>
 
             <form onSubmit={handleSubmit} className="settings-form" noValidate>
-              <PwdField
-                id="f-current"
-                label="Contraseña actual"
-                icon="lock"
-                value={current}
-                onChange={e => { setCurrent(e.target.value); setError(''); setSuccess(false) }}
-                show={showPwd}
-                onToggle={() => setShowPwd(v => !v)}
-                placeholder="Tu contraseña actual"
-                autoComplete="current-password"
-              />
-
               <PwdField
                 id="f-new"
                 label="Nueva contraseña"

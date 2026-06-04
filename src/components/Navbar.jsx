@@ -16,7 +16,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const location = useLocation()
-  const { user, logout } = useAuth()
+  const { user, isAdmin, logout } = useAuth()
 
   useEffect(() => { setMenuOpen(false); setUserMenuOpen(false) }, [location])
 
@@ -56,6 +56,17 @@ export default function Navbar() {
               </NavLink>
             </li>
           ))}
+          {isAdmin && (
+            <li>
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `nav-link nav-link-admin${isActive ? ' active' : ''}`}
+              >
+                <i className="fa-solid fa-shield-halved" aria-hidden="true" />
+                Admin
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         {/* User avatar */}
