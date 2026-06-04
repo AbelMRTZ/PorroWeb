@@ -394,6 +394,87 @@
 
 .admin-cancel-btn:disabled { opacity: 0.6; cursor: default; }
 
+/* ── Checkbox label ── */
+.admin-check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-check-label input[type="checkbox"] {
+  accent-color: var(--gold);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Events ── */
+.admin-drag-hint {
+  font-size: 0.8rem;
+  margin: 16px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-event-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: grab;
+  transition: border-color var(--transition), background var(--transition);
+  user-select: none;
+}
+
+.admin-event-item:active {
+  cursor: grabbing;
+}
+
+.admin-event-item.drag-over {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.07);
+}
+
+.admin-event-drag-handle {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.admin-event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-event-nombre {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin-event-fecha {
+  font-size: 0.78rem;
+}
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .admin-form-row {

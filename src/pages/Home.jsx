@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { RobotSpline } from '../components/RobotSpline'
+import { loadEvents } from '../data/eventsStore'
 import './Home.css'
 
 const TABS = ['Inicio', 'Actualidad', 'Accesos Rápidos']
@@ -48,6 +49,16 @@ export default function Home() {
 }
 
 function TabInicio() {
+  const [eventos, setEventos] = useState([])
+  const [eventosLoading, setEventosLoading] = useState(true)
+
+  useEffect(() => {
+    loadEvents()
+      .then(setEventos)
+      .catch(() => setEventos([]))
+      .finally(() => setEventosLoading(false))
+  }, [])
+
   return (
     <div className="widgets-grid">
       <div className="widget widget-wide widget-welcome">
@@ -66,29 +77,25 @@ function TabInicio() {
           <i className="fa-solid fa-calendar-days widget-header-icon" aria-hidden="true" />
           <h3>Próximos Eventos</h3>
         </div>
-        <ul className="event-list">
-          <li className="event-item">
-            <span className="event-dot" />
-            <div>
-              <span className="event-name">Porrolimpiadas 2026</span>
-              <span className="event-date">19 de Julio (9:30)</span>
-            </div>
-          </li>
-          <li className="event-item">
-            <span className="event-dot" />
-            <div>
-              <span className="event-name">Premios Porro 2026</span>
-              <span className="event-date">31 de Diciembre</span>
-            </div>
-          </li>
-          <li className="event-item">
-            <span className="event-dot event-dot-dim" />
-            <div>
-              <span className="event-name">Fantasy — Nueva Temporada</span>
-              <span className="event-date">Próximamente</span>
-            </div>
-          </li>
-        </ul>
+        {eventosLoading ? (
+          <p className="muted" style={{ fontSize: '0.88rem' }}>
+            <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Cargando…
+          </p>
+        ) : eventos.length === 0 ? (
+          <p className="muted" style={{ fontSize: '0.88rem' }}>Sin eventos próximos.</p>
+        ) : (
+          <ul className="event-list">
+            {eventos.map(evt => (
+              <li key={evt.id} className="event-item">
+                <span className={`event-dot${evt.dim ? ' event-dot-dim' : ''}`} />
+                <div>
+                  <span className="event-name">{evt.nombre}</span>
+                  <span className="event-date">{evt.fecha}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="widget">

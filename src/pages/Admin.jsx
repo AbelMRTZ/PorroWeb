@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { loadTrips, createTrip, updateTrip, deleteTrip, slugify } from '../data/tripsStore'
 import { uploadPhoto, compressToBlob } from '../data/galleryStore'
+import { loadEvents, createEvent, updateEventsOrder, deleteEvent } from '../data/eventsStore'
 import './Admin.css'
 
 function formatFecha(fecha) {
@@ -28,10 +29,25 @@ export default function Admin() {
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
 
+  const [events, setEvents] = useState([])
+  const [eventsLoading, setEventsLoading] = useState(true)
+  const [eventForm, setEventForm] = useState({ nombre: '', fecha: '', dim: false })
+  const [eventFormError, setEventFormError] = useState('')
+  const [eventSaving, setEventSaving] = useState(false)
+  const [dragOverIdx, setDragOverIdx] = useState(null)
+  const dragItem = useRef(null)
+  const dragOverItem = useRef(null)
+
   useEffect(() => {
     loadTrips()
       .then(data => setTrips(data.slice().reverse()))
       .finally(() => setTripsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    loadEvents()
+      .then(setEvents)
+      .finally(() => setEventsLoading(false))
   }, [])
 
   async function handlePhotoSelect(e) {
@@ -135,6 +151,49 @@ export default function Admin() {
     setEditSaving(false)
   }
 
+  async function handleCreateEvent(e) {
+    e.preventDefault()
+    const nombre = eventForm.nombre.trim()
+    const fecha  = eventForm.fecha.trim()
+    if (!nombre) { setEventFormError('El nombre es obligatorio.'); return }
+    if (!fecha && !eventForm.dim) { setEventFormError('La fecha es obligatoria.'); return }
+    setEventFormError('')
+    setEventSaving(true)
+    try {
+      const newEvt = await createEvent({ nombre, fecha, dim: eventForm.dim })
+      setEvents(prev => [...prev, newEvt])
+      setEventForm({ nombre: '', fecha: '', dim: false })
+    } catch (err) {
+      setEventFormError(err.message ?? 'Error al crear el evento.')
+    }
+    setEventSaving(false)
+  }
+
+  async function handleDeleteEvent(evt) {
+    if (!confirm(`¿Eliminar el evento "${evt.nombre}"?`)) return
+    try {
+      await deleteEvent(evt.id)
+      setEvents(prev => prev.filter(e => e.id !== evt.id))
+    } catch (err) {
+      alert(`Error al eliminar: ${err.message}`)
+    }
+  }
+
+  function handleDragEnd() {
+    setDragOverIdx(null)
+    const from = dragItem.current
+    const to   = dragOverItem.current
+    if (from !== null && to !== null && from !== to) {
+      const items = [...events]
+      const [dragged] = items.splice(from, 1)
+      items.splice(to, 0, dragged)
+      setEvents(items)
+      updateEventsOrder(items).catch(() => {})
+    }
+    dragItem.current   = null
+    dragOverItem.current = null
+  }
+
   async function handleDelete(trip) {
     if (!confirm(`¿Eliminar "${trip.nombre}"? Se borrarán también todas sus fotos.`)) return
     try {
@@ -153,7 +212,7 @@ export default function Admin() {
           <i className="fa-solid fa-shield-halved" aria-hidden="true" />
           Panel de Administración
         </h1>
-        <p className="admin-subtitle muted">Gestión de viajes de la Galería</p>
+        <p className="admin-subtitle muted">Gestión del contenido para administradores</p>
       </div>
 
       {/* ── Crear viaje ── */}
@@ -367,6 +426,119 @@ export default function Admin() {
           </div>
         )}
       </section>
+      {/* ── Eventos ── */}
+      <section className="admin-section">
+        <h2 className="admin-section-title">
+          <i className="fa-solid fa-calendar-days" aria-hidden="true" />
+          Próximos Eventos
+          <span className="admin-count">{events.length}</span>
+        </h2>
+
+        <form className="admin-form" onSubmit={handleCreateEvent}>
+          <div className="admin-form-row">
+            <div className="admin-field">
+              <label htmlFor="evt-nombre">
+                Nombre <span className="required">*</span>
+              </label>
+              <input
+                id="evt-nombre"
+                type="text"
+                placeholder="Ej: Porrolimpiadas 2026"
+                value={eventForm.nombre}
+                onChange={e => setEventForm(f => ({ ...f, nombre: e.target.value }))}
+                maxLength={80}
+              />
+            </div>
+            <div className="admin-field admin-field-date">
+              <label htmlFor="evt-fecha">
+                Fecha {eventForm.dim
+                  ? <span className="optional">(opcional)</span>
+                  : <span className="required">*</span>}
+              </label>
+              <input
+                id="evt-fecha"
+                type="text"
+                placeholder={eventForm.dim ? 'Próximamente' : 'Ej: 19 de Julio (9:30)'}
+                value={eventForm.fecha}
+                onChange={e => setEventForm(f => ({ ...f, fecha: e.target.value }))}
+                maxLength={60}
+              />
+            </div>
+          </div>
+
+          <label className="admin-check-label">
+            <input
+              type="checkbox"
+              checked={eventForm.dim}
+              onChange={e => setEventForm(f => ({
+                ...f,
+                dim: e.target.checked,
+                fecha: e.target.checked
+                  ? 'Próximamente...'
+                  : (f.fecha === 'Próximamente...' ? '' : f.fecha),
+              }))}
+            />
+            Sin fecha confirmada <span className="optional">(punto gris)</span>
+          </label>
+
+          {eventFormError && (
+            <div className="admin-error">
+              <i className="fa-solid fa-circle-exclamation" aria-hidden="true" /> {eventFormError}
+            </div>
+          )}
+
+          <button type="submit" className="admin-submit-btn" disabled={eventSaving}>
+            {eventSaving
+              ? <><i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Añadiendo…</>
+              : <><i className="fa-solid fa-plus" aria-hidden="true" /> Añadir evento</>}
+          </button>
+        </form>
+
+        {eventsLoading ? (
+          <p className="admin-empty-text muted" style={{ marginTop: 20 }}>
+            <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Cargando…
+          </p>
+        ) : events.length === 0 ? (
+          <p className="admin-empty-text muted" style={{ marginTop: 20 }}>No hay eventos añadidos todavía.</p>
+        ) : (
+          <>
+            <p className="admin-drag-hint muted">
+              <i className="fa-solid fa-arrows-up-down" aria-hidden="true" /> Arrastra para reordenar
+            </p>
+            <div className="admin-events-list">
+              {events.map((evt, idx) => (
+                <div
+                  key={evt.id}
+                  className={`admin-event-item${dragOverIdx === idx ? ' drag-over' : ''}`}
+                  draggable
+                  onDragStart={() => { dragItem.current = idx }}
+                  onDragEnter={() => { dragOverItem.current = idx; setDragOverIdx(idx) }}
+                  onDragOver={e => e.preventDefault()}
+                  onDragEnd={handleDragEnd}
+                >
+                  <span className="admin-event-drag-handle">
+                    <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
+                  </span>
+                  <span className={`event-dot${evt.dim ? ' event-dot-dim' : ''}`} style={{ flexShrink: 0 }} />
+                  <div className="admin-event-info">
+                    <span className="admin-event-nombre">{evt.nombre}</span>
+                    <span className="admin-event-fecha muted">{evt.fecha}</span>
+                  </div>
+                  <button
+                    className="admin-delete-btn"
+                    onClick={() => handleDeleteEvent(evt)}
+                    aria-label={`Eliminar ${evt.nombre}`}
+                    title="Eliminar evento"
+                  >
+                    <i className="fa-solid fa-trash" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
     </div>
   )
 }
