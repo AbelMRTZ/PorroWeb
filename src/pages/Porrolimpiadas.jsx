@@ -11,7 +11,7 @@ export default function Porrolimpiadas() {
         <header className="olim-header">
           <img 
             src="/porrolimpiadas/logo-transparente.png" 
-            alt="Logo Porrolimpiadas 2026 - Versión Transparente Requerida" 
+            alt="Logo Porrolimpiadas 2026" 
             className="olim-logo" 
           />
           <h1>Porrolimpiadas 2026</h1>
@@ -58,20 +58,23 @@ export default function Porrolimpiadas() {
           </div>
         </div>
 
-        {/* COMUNICADOS OFICIALES */}
+        {/* ANUNCIOS OFICIALES */}
         <h2 className="olim-section-title">
           <i className="fa-solid fa-bullhorn" style={{ color: 'var(--gold)' }}></i> 
           Anuncios Oficiales
         </h2>
         
         <div className="olim-videos-grid">
-          {/* Anuncio 1 */}
+          {/* Anuncio 1 (YouTube Short - Vertical) */}
           <div className="olim-video-card">
-            <div className="olim-video-wrapper">
-              <video controls preload="metadata">
-                <source src="/porrolimpiadas/anuncio-1.mp4" type="video/mp4" />
-                Tu navegador no soporta el reproductor de vídeo.
-              </video>
+            <div className="olim-video-wrapper vertical">
+              <iframe 
+                src="https://www.youtube.com/embed/_0KULuDE08k" 
+                title="Anuncio 1 Porrolimpiadas" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen>
+              </iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #1 - El Origen</h3>
@@ -79,12 +82,17 @@ export default function Porrolimpiadas() {
             </div>
           </div>
 
-          {/* Anuncio 2 */}
-          <div className="olim-video-card">
-            <div className="olim-video-wrapper">
-              <video controls preload="metadata">
-                <source src="/porrolimpiadas/anuncio-2.mp4" type="video/mp4" />
-              </video>
+          {/* Anuncio 2 (YouTube Standard - Horizontal) */}
+            <div className="olim-video-card">
+            {/* 🚀 CAMBIAMOS ESTA LÍNEA AÑADIENDO 'vertical' 🚀 */}
+            <div className="olim-video-wrapper vertical">
+              <iframe 
+                src="https://www.youtube.com/embed/pkJs8gfxjBk" 
+                title="Anuncio 2 Porrolimpiadas" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen>
+              </iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #2 - Los Juegos</h3>
@@ -92,12 +100,16 @@ export default function Porrolimpiadas() {
             </div>
           </div>
 
-          {/* Anuncio 3 */}
+          {/* Anuncio 3 (YouTube Short - Vertical) */}
           <div className="olim-video-card">
-            <div className="olim-video-wrapper">
-              <video controls preload="metadata">
-                <source src="/porrolimpiadas/anuncio-3.mp4" type="video/mp4" />
-              </video>
+            <div className="olim-video-wrapper vertical">
+              <iframe 
+                src="https://www.youtube.com/embed/3V_W9I5ynk0" 
+                title="Anuncio 3 Porrolimpiadas" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen>
+              </iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #3 - Horarios y Premios</h3>
@@ -129,7 +141,6 @@ export default function Porrolimpiadas() {
         <div className="olim-himno-container">
           <div className="olim-himno-media">
             <h4><i className="fa-solid fa-headphones"></i> Reproductor de Audio</h4>
-            {/* CORRECCIÓN DE AUDIO: Coincidiendo con la mayúscula .MP3 de tu captura */}
             <audio controls className="olim-audio-player">
               <source src="/porrolimpiadas/himno.MP3" type="audio/mpeg" />
               Tu navegador no soporta el audio.
@@ -137,9 +148,13 @@ export default function Porrolimpiadas() {
             
             <h4 style={{ marginTop: '15px' }}><i className="fa-solid fa-video"></i> Vídeo con Letra</h4>
             <div className="olim-video-wrapper vertical" style={{ borderRadius: '8px', overflow: 'hidden' }}>
-              <video controls preload="metadata">
-                <source src="/porrolimpiadas/himno-video.mp4" type="video/mp4" />
-              </video>
+              <iframe 
+                src="https://www.youtube.com/embed/kOph4jPO6mE" 
+                title="Himno Oficial Porrolimpiadas" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen>
+              </iframe>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '5px' }}>
               <strong>Cantantes oficiales:</strong> Adri, Juanfran, José Antonio, Cristina, Raquel, Sergio, Jorge, Clara, Silvia, Alba, Isabel, Abel, Mariaju y Paula Romero.
