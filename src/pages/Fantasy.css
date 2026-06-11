@@ -1,0 +1,280 @@
+/* src/pages/Fantasy.css */
+
+.fantasy-container {
+  max-width: 750px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  animation: fadeIn 0.2s ease;
+}
+
+.fantasy-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.fantasy-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #5AC8FA, var(--purple-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+}
+
+.sub-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.sub-btn {
+  padding: 6px 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sub-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.sub-btn.active {
+  background: var(--border);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 35px 0 15px 5px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+/* ── Macro Grid Adaptado al Tema Oscuro ── */
+.macro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.macro-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transition);
+}
+
+.macro-card:hover {
+  transform: translateY(-2px);
+}
+
+.macro-card.full-width { grid-column: span 2; }
+.mc-icon { font-size: 1.6rem; margin-bottom: 8px; }
+.mc-title { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+.mc-val { font-size: 1.5rem; font-weight: 800; margin: 4px 0; color: var(--text); }
+.mc-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+
+/* Detalles de color integrados */
+.macro-card.bg-blue { border-left: 4px solid #007AFF; }
+.macro-card.bg-green { border-left: 4px solid var(--success, #34C759); }
+.macro-card.bg-gold { border-left: 4px solid var(--gold); }
+.macro-card.bg-red { border-left: 4px solid var(--error, #FF3B30); }
+.macro-card.bg-purple { border-left: 4px solid var(--purple-light); }
+.macro-card.bg-silver { border-left: 4px solid #9E9E9E; }
+.macro-card.bg-dark { border-left: 4px solid var(--text-muted); }
+
+.macro-card.bg-gold .mc-val { color: var(--gold-light); }
+
+/* ── Player Cards Adaptadas ── */
+.player-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+
+.player-card:hover {
+  border-color: var(--text-muted);
+}
+
+.player-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-header.ph-rank-1 { background: rgba(245, 158, 11, 0.08); }
+.player-header.ph-rank-2 { background: rgba(255, 255, 255, 0.04); }
+.player-header.ph-rank-3 { background: rgba(210, 105, 30, 0.08); }
+.player-header.ph-rank-mid { background: rgba(255, 255, 255, 0.01); }
+.player-header.ph-rank-last { background: rgba(255, 59, 48, 0.06); }
+
+.player-name { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+.ph-rank-1 .player-name { color: var(--gold-light); }
+.ph-rank-2 .player-name { color: var(--text); }
+
+.player-tag { 
+  font-size: 0.72rem; 
+  font-weight: 600; 
+  background: var(--bg-surface2); 
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px; 
+  border-radius: 20px; 
+}
+
+.player-body { padding: 20px; }
+
+.p-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.p-stat-item {
+  background: var(--bg-surface2);
+  padding: 10px;
+  border-radius: var(--radius);
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.p-stat-item span {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.p-stat-item strong {
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.key-points {
+  list-style: none;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.key-points li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.key-points li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #007AFF;
+  font-size: 1.2rem;
+  line-height: 0.9;
+}
+
+.ph-rank-last + .player-body .key-points li::before { color: #FF3B30; }
+.ph-rank-1 + .player-body .key-points li::before { color: var(--gold); }
+
+.financial-box {
+  margin-top: 15px;
+  padding: 12px 15px;
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.fin-cobrar { background-color: rgba(52, 199, 89, 0.05); color: #34C759; border-color: rgba(52, 199, 89, 0.15); }
+.fin-pagar { background-color: rgba(255, 59, 48, 0.05); color: #FF3B30; border-color: rgba(255, 59, 48, 0.15); }
+.fin-amount { font-size: 1.1rem; font-weight: 800; }
+
+/* ── Clasificaciones de Lista Unificadas (Estilo Abel) ── */
+.legacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legacy-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: var(--bg-surface);
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition);
+}
+
+.legacy-item:hover {
+  border-color: var(--text-muted);
+}
+
+.legacy-item.retirado {
+  opacity: 0.4;
+  background: var(--bg-surface2);
+  border-style: dashed;
+}
+
+.legacy-pos {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  width: 30px;
+  text-align: center;
+}
+
+.legacy-item:nth-child(1) .legacy-pos { color: var(--gold); }
+.legacy-item:nth-child(2) .legacy-pos { color: #9E9E9E; }
+.legacy-item:nth-child(3) .legacy-pos { color: #D2691E; }
+
+.legacy-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.legacy-points {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.legacy-item.retirado .legacy-points {
+  color: #FF3B30;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
