@@ -1,28 +1,26 @@
 // src/pages/Porra.jsx
 
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { partidosFaseGrupos } from '../data/partidosMundial'
 import { USERS } from '../data/usersConfig'
 import './Porra.css'
-import { Link } from 'react-router-dom'
 
-// Función para saber si un partido ya ha comenzado (bloqueo individual)
-const comprobarPartidoComenzado = (fechaStr) => {
-  const meses = { 'Jun': 5, 'Jul': 6 }
-  const partes = fechaStr.split(' ')
-  const dia = parseInt(partes[0])
-  const mes = meses[partes[1]]
-  // Hora límite a las 15:00 del día del partido
-  const fechaPartido = new Date(2026, mes, dia, 15, 0, 0)
-  return new Date() >= fechaPartido
+// Función para saber si un partido ya ha comenzado con reloj exacto de España
+const comprobarPartidoComenzado = (timestamp) => {
+  if (!timestamp) return false
+  const msPartido = new Date(timestamp).getTime()
+  if (isNaN(msPartido)) return false
+  return Date.now() >= msPartido
 }
 
 export default function Porra() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('miporra')
   const [misResultados, setMisResultados] = useState({})
+  const [resultadosOriginales, setResultadosOriginales] = useState({}) // 🛡️ RESPALDO ANTI-TRAMPAS
   const [loadingGuardar, setLoadingGuardar] = useState(false)
   
   // Estados para la clasificación
@@ -47,6 +45,8 @@ export default function Porra() {
           resultadosGuardados[p.partido_id] = { local: p.goles_local, visitante: p.goles_visitante }
         })
         setMisResultados(resultadosGuardados)
+        // Guardamos una copia exacta para saber qué se modifica en tiempo real
+        setResultadosOriginales(JSON.parse(JSON.stringify(resultadosGuardados)))
       }
     }
     cargarMiPorra()
@@ -89,10 +89,35 @@ export default function Porra() {
     }))
   }
 
+  // ── 4. GUARDAR Y VERIFICACIÓN DE SEGURIDAD EN EL CLICK ──
   const handleGuardarProgreso = async () => {
     setLoadingGuardar(true)
+    const ahora = Date.now()
+    let partidosTrampa = []
+
     const datosAInsertar = Object.entries(misResultados)
-      .filter(([_, marcador]) => marcador.local !== '' && marcador.visitante !== '' && marcador.local !== undefined)
+      .filter(([partidoId, marcador]) => {
+        const tieneDatos = marcador.local !== '' && marcador.visitante !== '' && marcador.local !== undefined
+        if (!tieneDatos) return false
+
+        // Comparamos el marcador actual con el que cargó la base de datos al inicio
+        const orig = resultadosOriginales[partidoId]
+        const haCambiado = !orig || orig.local !== marcador.local || orig.visitante !== marcador.visitante
+        
+        // Si no se ha modificado en esta sesión, lo ignoramos (evita falsos positivos con partidos antiguos)
+        if (!haCambiado) return false
+
+        const partido = partidosFaseGrupos.find(p => p.id === Number(partidoId))
+        if (!partido) return false
+
+        // 🛡️ CAPA DE SEGURIDAD EN EL BOTÓN: ¿Ha empezado ya el partido en este milisegundo?
+        const yaEmpezo = ahora >= new Date(partido.timestamp).getTime()
+        if (yaEmpezo) {
+          partidosTrampa.push(`${partido.banderaLocal} ${partido.equipoLocal} vs ${partido.equipoVisitante} ${partido.banderaVisitante}`)
+          return false // Lo eliminamos de la lista de subida
+        }
+        return true
+      })
       .map(([partidoId, marcador]) => ({
         user_id: user.id,
         partido_id: Number(partidoId),
@@ -100,11 +125,18 @@ export default function Porra() {
         goles_visitante: marcador.visitante
       }))
 
+    // Alerta si alguien ha intentado burlar el reloj o se le ha pasado la hora con la página abierta
+    if (partidosTrampa.length > 0) {
+      alert(`🚨 ¡ACCESO DE TIEMPO EXPIRADO!\n\nNo se han guardado los pronósticos para:\n${partidosTrampa.join('\n')}\n\nMotivo: El partido ya ha comenzado en la vida real. Las trampas no están permitidas en esta federación.`);
+    }
+
     if (datosAInsertar.length > 0) {
       await supabase.from('porra_pronosticos').upsert(datosAInsertar)
-      alert("¡Resultados guardados! Se bloquearán automáticamente cuando empiece cada partido.")
-    } else {
-      alert("No has puesto ningún resultado válido todavía.")
+      // Actualizamos el respaldo original para la siguiente tanda de cambios
+      setResultadosOriginales(JSON.parse(JSON.stringify(misResultados)))
+      alert("¡Tus pronósticos válidos han sido guardados en Supabase!")
+    } else if (partidosTrampa.length === 0) {
+      alert("No has modificado ningún marcador nuevo todavía.")
     }
     setLoadingGuardar(false)
   }
@@ -173,10 +205,9 @@ export default function Porra() {
         {activeTab === 'miporra' && (
           <div className="tab-content">
             <div style={{ padding: '15px', background: 'var(--bg-surface2)', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid var(--gold)', fontSize: '0.9rem' }}>
-              <i className="fa-solid fa-circle-info" style={{ color: 'var(--gold)' }}></i> <strong>Dinámica:</strong> Rellena los partidos a tu ritmo. Recuerda pulsar <strong>"Guardar"</strong> para no perder los datos. Los partidos se bloquean automáticamente cuando llega su hora de inicio.
+              <i className="fa-solid fa-circle-info" style={{ color: 'var(--gold)' }}></i> <strong>Dinámica:</strong> Rellena los partidos a tu ritmo. Recuerda pulsar <strong>"Guardar"</strong> para no perder los datos. Los partidos se bloquean automáticamente cuando llega su hora exacta de inicio.
             </div>
 
-            {/* BOTÓN MOVIDO ARRIBA Y EN COLOR VERDE */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
               <button 
                 className="btn-finalizar" 
@@ -193,11 +224,11 @@ export default function Porra() {
 
             <div className="partidos-list">
               {partidosFaseGrupos.map(partido => {
-                const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.fecha)
+                const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
                 return (
                   <div key={partido.id} className="partido-card">
                     <div className="partido-info">
-                      <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
+                      <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
                       <div className="equipos-wrap">
                         <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                         <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
@@ -294,15 +325,14 @@ export default function Porra() {
             ) : porraOtro ? (
               <div className="partidos-list">
                 {partidosFaseGrupos.map(partido => {
-                  // Comprobamos si el usuario actual (yo) tiene un pronóstico válido para este partido
                   const miPron = misResultados[partido.id]
                   const tengoPronostico = miPron && miPron.local !== '' && miPron.local !== undefined && miPron.visitante !== '' && miPron.visitante !== undefined
-                  const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.fecha)
+                  const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
 
                   return (
                     <div key={partido.id} className="partido-card">
                       <div className="partido-info">
-                        <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                        <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
                         <div className="equipos-wrap">
                           <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                           <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
