@@ -75,9 +75,15 @@
 }
 
 .miembro-card h3 {
-  font-size: 1.1rem; 
+  font-size: 1.1rem;
   color: var(--text);
   font-weight: 600;
   margin: 0;
   letter-spacing: 0.02em;
+}
+
+@media (max-width: 480px) {
+  .miembros-header h1 { font-size: 1.8rem; }
+  .miembro-card { width: 130px; padding: 22px 8px; }
+  .miembro-card h3 { font-size: 1rem; }
 }

@@ -391,10 +391,10 @@
 }
 
 @media (max-width: 600px) {
-  .widget-wide {
-    flex-direction: column;
-  }
-  .tabs-bar {
-    overflow-x: auto;
-  }
+  .widget-wide { flex-direction: column; }
+  .tabs-bar { overflow-x: auto; }
+  .hero { padding: 50px 16px 60px; min-height: 320px; }
+  .hero-subtitle { font-size: 0.95rem; }
+  .accesos-grid { grid-template-columns: 1fr; }
+  .news-grid { grid-template-columns: 1fr; }
 }

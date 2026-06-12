@@ -172,3 +172,9 @@ button {
   color: var(--green);
   border: 1px solid rgba(16, 185, 129, 0.35);
 }
+
+@media (max-width: 600px) {
+  .container { padding: 0 16px; }
+  .page { padding: 28px 0 50px; }
+  .page-header { margin-bottom: 36px; }
+}

@@ -182,3 +182,16 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+@media (max-width: 600px) {
+  .profile-main-header {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 15px;
+  }
+  .profile-titles h2 { font-size: 1.6rem; }
+  .profile-stats-grid { grid-template-columns: 1fr; }
+  .profile-data-list li { flex-wrap: wrap; gap: 6px; }
+  .data-desc { margin-left: 6px; }
+}

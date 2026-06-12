@@ -278,3 +278,13 @@
   letter-spacing: 0.05em;
   font-weight: 600;
 }
+
+@media (max-width: 600px) {
+  .fantasy-header h1 { font-size: 1.7rem; }
+  .sub-tabs { flex-wrap: wrap; gap: 8px; }
+  .macro-grid { grid-template-columns: 1fr; }
+  .macro-card.full-width { grid-column: span 1; }
+  .p-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .player-header { flex-wrap: wrap; gap: 8px; }
+  .financial-box { flex-direction: column; gap: 4px; text-align: center; }
+}

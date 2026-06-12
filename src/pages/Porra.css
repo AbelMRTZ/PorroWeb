@@ -178,3 +178,13 @@
   font-weight: 600;
   text-transform: uppercase;
 }
+
+@media (max-width: 600px) {
+  .porra-header h1 { font-size: 1.8rem; }
+  .porra-tabs { flex-wrap: wrap; padding: 8px; gap: 6px; }
+  .tab-btn { padding: 10px 16px; font-size: 0.9rem; flex: 1; text-align: center; }
+  .partido-card { flex-direction: column; gap: 15px; }
+  .marcador-inputs { align-self: stretch; justify-content: center; }
+  .ranking-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .ranking-table th, .ranking-table td { padding: 12px 10px; font-size: 0.85rem; }
+}

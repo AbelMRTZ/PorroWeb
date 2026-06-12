@@ -395,19 +395,15 @@
 }
 
 @media (max-width: 700px) {
-  .stats-panels {
-    grid-template-columns: 1fr;
-  }
-  .stats-panel-champion {
-    grid-column: 1;
-  }
-  .lb-row {
-    grid-template-columns: 20px 1fr auto;
-  }
-  .lb-bar-wrap {
-    display: none;
-  }
-  .champions-list {
-    grid-template-columns: 1fr;
-  }
+  .stats-panels { grid-template-columns: 1fr; }
+  .stats-panel-champion { grid-column: 1; }
+  .lb-row { grid-template-columns: 20px 1fr auto; }
+  .lb-bar-wrap { display: none; }
+  .champions-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .categorias-grid { grid-template-columns: 1fr; }
+  .year-btn { padding: 8px 18px; font-size: 0.9rem; }
+  .edition-heading { flex-wrap: wrap; gap: 10px; }
 }
