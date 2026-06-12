@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { loadTrips, createTrip, updateTrip, deleteTrip, slugify } from '../data/tripsStore'
 import { uploadPhoto, compressToBlob } from '../data/galleryStore'
@@ -214,6 +215,21 @@ export default function Admin() {
         </h1>
         <p className="admin-subtitle muted">Gestión del contenido para administradores</p>
       </div>
+
+      <section className="admin-section">
+        <h2 className="admin-section-title">
+          <i className="fa-solid fa-futbol" aria-hidden="true" /> Gestión Porra Mundial
+        </h2>
+        <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: 'var(--text)' }}>Resultados Oficiales</h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>Actualiza los marcadores reales para que la clasificación se calcule sola.</p>
+          </div>
+          <Link to="/admin/porra" className="admin-submit-btn" style={{ textDecoration: 'none', display: 'inline-flex', width: 'auto', margin: 0 }}>
+            <i className="fa-solid fa-pen-to-square"></i> Panel de Resultados
+          </Link>
+        </div>
+      </section>
 
       {/* ── Crear viaje ── */}
       <section className="admin-section">

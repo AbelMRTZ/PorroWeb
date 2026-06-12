@@ -12,6 +12,11 @@ import Fantasy from './pages/Fantasy'
 import Galeria from './pages/Galeria'
 import Admin from './pages/Admin'
 import RequireAdmin from './components/RequireAdmin'
+import Contacto from './pages/Contacto'
+import Miembros from './pages/Miembros'
+import Porra from './pages/Porra'
+import AdminPorra from './pages/AdminPorra'
+import Perfiles from './pages/Perfiles'
 
 function App() {
   const { user, authLoading } = useAuth()
@@ -36,6 +41,11 @@ function App() {
           <Route path="/galeria/:tripSlug" element={<RequireAuth><Galeria /></RequireAuth>} />
 
           <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+          <Route path="/contacto" element={<RequireAuth><Contacto /></RequireAuth>} />
+          <Route path="/miembros" element={<RequireAuth><Miembros /></RequireAuth>} />
+          <Route path="/porra" element={<RequireAuth><Porra /></RequireAuth>} />
+          <Route path="/admin/porra" element={<RequireAuth><AdminPorra /></RequireAuth>} />
+          <Route path="/perfiles" element={<RequireAuth><Perfiles /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

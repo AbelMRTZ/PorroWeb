@@ -1,24 +1,29 @@
 // src/pages/Porrolimpiadas.jsx
 
+import { Link } from 'react-router-dom'
+import { USERS } from '../data/usersConfig'
 import './Porrolimpiadas.css'
+
+const getUserId = (nombre) => {
+  if (nombre === 'Adri') return 'adri'
+  if (nombre === 'José Antonio') return 'jose'
+  if (nombre === 'Paula Romero') return 'paula-edurne'
+  if (nombre === 'Alba') return 'alba-s'
+  const match = USERS.find(u => u.nombre.includes(nombre) || nombre.includes(u.nombre))
+  return match ? match.id : null
+}
 
 export default function Porrolimpiadas() {
   return (
     <div className="page">
       <div className="olim-container">
         
-        {/* CABECERA CON HALO INTENSO */}
         <header className="olim-header">
-          <img 
-            src="/porrolimpiadas/logo-transparente.png" 
-            alt="Logo Porrolimpiadas 2026" 
-            className="olim-logo" 
-          />
+          <img src="/porrolimpiadas/logo-transparente.png" alt="Logo Porrolimpiadas 2026" className="olim-logo" />
           <h1>Porrolimpiadas 2026</h1>
           <p>El evento más épico de la historia del grupo</p>
         </header>
 
-        {/* INFORMACIÓN OFICIAL */}
         <div className="olim-info-grid">
           <div className="olim-info-card">
             <i className="fa-solid fa-calendar-day"></i>
@@ -36,19 +41,26 @@ export default function Porrolimpiadas() {
             <span className="olim-info-text">Campo de Sergio, Yecla</span>
           </div>
           
-          {/* Participantes en Badges */}
           <div className="olim-info-card" style={{ gridColumn: '1 / -1' }}>
             <i className="fa-solid fa-users"></i>
-            <span className="olim-info-title">Participantes (26 en total)</span>
+            {/* 🚀 CAMBIAMOS A 24 EN TOTAL */}
+            <span className="olim-info-title">Participantes (24 en total)</span>
             <div className="participants-wrap">
               {[
                 "Abel", "Adri", "Alba", "Clara", "Cristina", "Isabel", "Jorge", 
                 "José Antonio", "Juanfran", "Laura Bañón", "Mariaju", "Paula Morís", 
-                "Paula Romero", "Raquel", "Silvia", "Lucía", "Laura", "Paula", 
-                "Gema", "Cristian", "Javi", "Mario"
-              ].map((nombre, i) => (
-                <span key={i} className="participant-badge">{nombre}</span>
-              ))}
+                "Paula Romero", "Raquel", "Silvia", "Lucía", "Gema", "Cristian", "Javi", "Mario"
+                // 🚀 AQUÍ HEMOS QUITADO A "Laura" y "Paula" (las externas)
+              ].map((nombre, i) => {
+                const uId = getUserId(nombre)
+                return uId ? (
+                  <Link to="/perfiles" state={{ userId: uId }} key={i} style={{ textDecoration: 'none' }}>
+                    <span className="participant-badge" style={{ cursor: 'pointer', background: 'rgba(255,215,0,0.1)', color: 'var(--gold)' }}>{nombre}</span>
+                  </Link>
+                ) : (
+                  <span key={i} className="participant-badge">{nombre}</span>
+                )
+              })}
               
               {/* Espacios misteriosos */}
               {["¿?", "¿?", "¿?", "¿?"].map((misterio, i) => (
@@ -58,23 +70,13 @@ export default function Porrolimpiadas() {
           </div>
         </div>
 
-        {/* ANUNCIOS OFICIALES */}
-        <h2 className="olim-section-title">
-          <i className="fa-solid fa-bullhorn" style={{ color: 'var(--gold)' }}></i> 
-          Anuncios Oficiales
-        </h2>
+        <h2 className="olim-section-title"><i className="fa-solid fa-bullhorn" style={{ color: 'var(--gold)' }}></i> Anuncios Oficiales</h2>
         
         <div className="olim-videos-grid">
-          {/* Anuncio 1 (YouTube Short - Vertical) */}
+          {/* Anuncio 1 */}
           <div className="olim-video-card">
             <div className="olim-video-wrapper vertical">
-              <iframe 
-                src="https://www.youtube.com/embed/_0KULuDE08k" 
-                title="Anuncio 1 Porrolimpiadas" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen>
-              </iframe>
+              <iframe src="https://www.youtube.com/embed/_0KULuDE08k" title="Anuncio 1" frameBorder="0" allowFullScreen></iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #1 - El Origen</h3>
@@ -82,17 +84,10 @@ export default function Porrolimpiadas() {
             </div>
           </div>
 
-          {/* Anuncio 2 (YouTube Standard - Horizontal) */}
+          {/* Anuncio 2 */}
             <div className="olim-video-card">
-            {/* 🚀 CAMBIAMOS ESTA LÍNEA AÑADIENDO 'vertical' 🚀 */}
             <div className="olim-video-wrapper vertical">
-              <iframe 
-                src="https://www.youtube.com/embed/pkJs8gfxjBk" 
-                title="Anuncio 2 Porrolimpiadas" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen>
-              </iframe>
+              <iframe src="https://www.youtube.com/embed/pkJs8gfxjBk" title="Anuncio 2" frameBorder="0" allowFullScreen></iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #2 - Los Juegos</h3>
@@ -100,16 +95,10 @@ export default function Porrolimpiadas() {
             </div>
           </div>
 
-          {/* Anuncio 3 (YouTube Short - Vertical) */}
+          {/* Anuncio 3 */}
           <div className="olim-video-card">
             <div className="olim-video-wrapper vertical">
-              <iframe 
-                src="https://www.youtube.com/embed/3V_W9I5ynk0" 
-                title="Anuncio 3 Porrolimpiadas" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen>
-              </iframe>
+              <iframe src="https://www.youtube.com/embed/3V_W9I5ynk0" title="Anuncio 3" frameBorder="0" allowFullScreen></iframe>
             </div>
             <div className="olim-video-content">
               <h3>Anuncio #3 - Horarios y Premios</h3>
@@ -117,7 +106,7 @@ export default function Porrolimpiadas() {
             </div>
           </div>
 
-          {/* Anuncio 4 (Próximamente) */}
+          {/* Anuncio 4 */}
           <div className="olim-video-card">
             <div className="olim-video-wrapper">
               <div className="olim-video-locked">
@@ -132,11 +121,7 @@ export default function Porrolimpiadas() {
           </div>
         </div>
 
-        {/* HIMNO OFICIAL */}
-        <h2 className="olim-section-title">
-          <i className="fa-solid fa-music" style={{ color: 'var(--purple-light)' }}></i> 
-          Himno Oficial
-        </h2>
+        <h2 className="olim-section-title"><i className="fa-solid fa-music" style={{ color: 'var(--purple-light)' }}></i> Himno Oficial</h2>
         
         <div className="olim-himno-container">
           <div className="olim-himno-media">
@@ -148,13 +133,7 @@ export default function Porrolimpiadas() {
             
             <h4 style={{ marginTop: '15px' }}><i className="fa-solid fa-video"></i> Vídeo con Letra</h4>
             <div className="olim-video-wrapper vertical" style={{ borderRadius: '8px', overflow: 'hidden' }}>
-              <iframe 
-                src="https://www.youtube.com/embed/kOph4jPO6mE" 
-                title="Himno Oficial Porrolimpiadas" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen>
-              </iframe>
+              <iframe src="https://www.youtube.com/embed/kOph4jPO6mE" title="Himno Oficial" frameBorder="0" allowFullScreen></iframe>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '5px' }}>
               <strong>Cantantes oficiales:</strong> Adri, Juanfran, José Antonio, Cristina, Raquel, Sergio, Jorge, Clara, Silvia, Alba, Isabel, Abel, Mariaju y Paula Romero.
@@ -163,52 +142,17 @@ export default function Porrolimpiadas() {
 
           <div className="olim-lyrics">
             <strong>LETRA OFICIAL</strong><br/><br/>
-            Es diecinueve ya<br/>
-            Bajo el sol de Yecla<br/>
-            La revolución, externos también, son nuestra familia<br/><br/>
-
-            Puntos en la tabla<br/>
-            Buscan las victorias<br/>
-            Juntos peleando por las medallas que hoy vamos a ganar<br/><br/>
-
-            Porros porros porros porros porros<br/>
-            Hemos venido aquí a drogarnos<br/>
-            Lo que ganemos nos da igual<br/><br/>
-            
-            Porrolimpiadas  lolo-lolo-looo     lolo-lolo lolo-lolo-loooo<br/>
-            Porrolimpiadas  lolo-lolo-looo     lolo-lolo lo lo looooo<br/><br/>
-
-            Gran banquete con la paella<br/>
-            Juntos la vamos a disfrutar<br/>
-            Es el chef Jorge quien cocinará y la gente ya cantará<br/><br/>
-
-            Porros porros porros porros porros<br/>
-            Hemos venido aquí a drogarnos<br/>
-            Lo que ganemos nos da igual  <br/><br/>
-
-            La gente se motiva<br/>
-            La risa nos alegra<br/>
-            La magia se presenta<br/>
-            Juegos y diversiones<br/>
-            Ellos valen millones<br/>
-            La historia ya se crea<br/>
-            Porrolimpiadas 2026<br/><br/>
-
-            La noche llega ya<br/>
-            Es hora de cenar<br/>
-            Noche de Mundial, viendo la copa, toda nuestra banda.<br/><br/>
-
-            Listos pa celebrar<br/>
-            Saca la bebida<br/>
-            Grita con el gol, todos a cantar, vamos a disfrutar<br/><br/>
-
-            Porros porros porros porros porros<br/>
-            Hemos venido aquí a drogarnos<br/>
-            Lo que ganemos nos da igual<br/><br/>
-
-            Porros porros porros porros porros<br/>
-            Hemos venido aquí a drogarnos<br/>
-            Lo que ganemos nos da igual (x3)
+            Es diecinueve ya<br/>Bajo el sol de Yecla<br/>La revolución, externos también, son nuestra familia<br/><br/>
+            Puntos en la tabla<br/>Buscan las victorias<br/>Juntos peleando por las medallas que hoy vamos a ganar<br/><br/>
+            Porros porros porros porros porros<br/>Hemos venido aquí a drogarnos<br/>Lo que ganemos nos da igual<br/><br/>
+            Porrolimpiadas  lolo-lolo-looo     lolo-lolo lolo-lolo-loooo<br/>Porrolimpiadas  lolo-lolo-looo     lolo-lolo lo lo looooo<br/><br/>
+            Gran banquete con la paella<br/>Juntos la vamos a disfrutar<br/>Es el chef Jorge quien cocinará y la gente ya cantará<br/><br/>
+            Porros porros porros porros porros<br/>Hemos venido aquí a drogarnos<br/>Lo que ganemos nos da igual  <br/><br/>
+            La gente se motiva<br/>La risa nos alegra<br/>La magia se presenta<br/>Juegos y diversiones<br/>Ellos valen millones<br/>La historia ya se crea<br/>Porrolimpiadas 2026<br/><br/>
+            La noche llega ya<br/>Es hora de cenar<br/>Noche de Mundial, viendo la copa, toda nuestra banda.<br/><br/>
+            Listos pa celebrar<br/>Saca la bebida<br/>Grita con el gol, todos a cantar, vamos a disfrutar<br/><br/>
+            Porros porros porros porros porros<br/>Hemos venido aquí a drogarnos<br/>Lo que ganemos nos da igual<br/><br/>
+            Porros porros porros porros porros<br/>Hemos venido aquí a drogarnos<br/>Lo que ganemos nos da igual (x3)
           </div>
         </div>
 

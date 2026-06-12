@@ -1,0 +1,180 @@
+/* src/pages/Porra.css */
+
+.porra-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 20px 50px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.porra-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.porra-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00b09b, #96c93d); /* Tonos césped/fútbol */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+/* ── Pestañas de Navegación ── */
+.porra-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  background: var(--bg-surface);
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #000;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+/* ── Lista de Partidos y Marcadores ── */
+.partidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.partido-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.partido-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.partido-fecha {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.equipos-wrap {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.marcador-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-surface2);
+  padding: 10px 15px;
+  border-radius: var(--radius);
+}
+
+.marcador-inputs input {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.marcador-inputs input:focus {
+  border-color: var(--gold);
+}
+
+.marcador-inputs input:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: var(--gold-light);
+}
+
+/* ── Botón Finalizar ── */
+.btn-finalizar {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 40px auto 0;
+  padding: 15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-finalizar:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+.btn-finalizar:disabled {
+  background: var(--bg-surface2);
+  color: var(--text-dim);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Clasificación Global ── */
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ranking-table th, .ranking-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.ranking-table th {
+  background: var(--bg-surface2);
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+}

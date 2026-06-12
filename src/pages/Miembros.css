@@ -1,0 +1,83 @@
+/* src/pages/Miembros.css */
+
+.miembros-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 20px 50px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.miembros-header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.miembros-header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.miembros-header p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* ── Banner de la Foto de Grupo ── */
+.grupo-banner {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  margin-bottom: 45px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.grupo-banner img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+}
+
+/* ── Cuadrícula de Miembros (18 tarjetas) centradas ── */
+.miembros-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Esta es la magia para centrar la última fila */
+  gap: 15px;
+}
+
+.miembro-card {
+  width: 160px; /* Ancho fijo para que parezca una cuadrícula perfecta */
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 30px 10px; 
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  min-height: 80px; 
+}
+
+.miembro-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold-light);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.05);
+}
+
+.miembro-card h3 {
+  font-size: 1.1rem; 
+  color: var(--text);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.02em;
+}

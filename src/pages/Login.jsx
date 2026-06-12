@@ -1,3 +1,5 @@
+// src/pages/Login.jsx
+
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { USERS } from '../data/usersConfig'
@@ -5,6 +7,28 @@ import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
 const STEP = { SELECT: 'select', NEW: 'new', ENTER: 'enter' }
+
+// Base de datos local de códigos de activación secretos
+const CODIGOS_ACTIVACION = {
+  'abel': 'biciplaneazul',
+  'adrian': 'cochetrennegro',
+  'alba': 'sillapapelnubes',
+  'andrea': 'osoleontigre',
+  'clara': 'llavepuertablanca',
+  'cristina': 'lapizbiciverde',
+  'isabel': 'ventanasuelorojo',
+  'jorge': 'libromesaazul',
+  'joseantonio': 'solplayaverde',
+  'juanfran': 'mototrenazul',
+  'laurabanon': 'librocasagato',
+  'lauralorenzo': 'playazulperro',
+  'mariaju': 'mesasillablanca',
+  'paulamoris': 'aviontigrenegro',
+  'paularomero': 'nubesolmonte',
+  'raquel': 'cochegatoverde',
+  'sergio': 'perrogatocasa',
+  'silvia': 'papelpuertaazul'
+}
 
 function initials(nombre) {
   return nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -18,6 +42,7 @@ export default function Login() {
 
   const [step, setStep]               = useState(STEP.SELECT)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [activationCode, setActivationCode] = useState('') // 🚀 NUEVO
   const [password, setPassword]       = useState('')
   const [confirm, setConfirm]         = useState('')
   const [showPwd, setShowPwd]         = useState(false)
@@ -26,7 +51,7 @@ export default function Login() {
 
   async function pickUser(u) {
     setSelectedUser(u)
-    setPassword(''); setConfirm(''); setError('')
+    setPassword(''); setConfirm(''); setActivationCode(''); setError('')
     setLoading(true)
     const has = await hasPassword(u.id)
     setLoading(false)
@@ -36,13 +61,29 @@ export default function Login() {
   function back() {
     setStep(STEP.SELECT)
     setSelectedUser(null)
-    setPassword(''); setConfirm(''); setError('')
+    setPassword(''); setConfirm(''); setActivationCode(''); setError('')
   }
 
   async function handleNew(e) {
     e.preventDefault()
+
+    // Lógica para normalizar el nombre y verificar su código secreto
+    const claveNormalizada = selectedUser.nombre
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z]/g, "")
+
+    const codigoCorrecto = CODIGOS_ACTIVACION[claveNormalizada]
+
+    if (activationCode.trim().toLowerCase() !== codigoCorrecto) {
+      setError('El código de activación por WhatsApp no es correcto.')
+      return
+    }
+
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
     if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
+    
     setLoading(true)
     const result = await setupPassword(selectedUser.id, password)
     setLoading(false)
@@ -113,10 +154,27 @@ export default function Login() {
               <span>{selectedUser.nombre}</span>
             </div>
             <p className="login-subtitle">
-              Primera vez que entras. Elige tu contraseña.
+              Primera vez que entras. Introduce tu código de activación.
             </p>
 
             <form className="login-form" onSubmit={handleNew} noValidate>
+              
+              {/* 🚀 NUEVO CAMPO: Código de WhatsApp */}
+              <div className="field">
+                <label className="field-label" htmlFor="activation-code">
+                  <i className="fa-solid fa-key" aria-hidden="true" /> Código de WhatsApp
+                </label>
+                <input
+                  id="activation-code"
+                  className="field-input"
+                  type="text"
+                  value={activationCode}
+                  onChange={e => { setActivationCode(e.target.value); setError('') }}
+                  placeholder="Introduce las 3 palabras juntas"
+                  autoFocus
+                />
+              </div>
+
               <div className="field">
                 <label className="field-label" htmlFor="pwd-new">
                   <i className="fa-solid fa-lock" aria-hidden="true" /> Nueva contraseña
@@ -128,7 +186,6 @@ export default function Login() {
                   show={showPwd}
                   onToggle={() => setShowPwd(v => !v)}
                   placeholder="Mínimo 6 caracteres"
-                  autoFocus
                 />
               </div>
 
@@ -151,7 +208,7 @@ export default function Login() {
               <button type="submit" className="login-submit" disabled={loading}>
                 {loading
                   ? <><i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Guardando…</>
-                  : <><i className="fa-solid fa-check" aria-hidden="true" /> Guardar y entrar</>}
+                  : <><i className="fa-solid fa-check" aria-hidden="true" /> Registrarse y Entrar</>}
               </button>
             </form>
 

@@ -1,9 +1,20 @@
 // src/pages/Fantasy.jsx
 
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { USERS } from '../data/usersConfig'
 import { classification2526, fantasy2425, macroStats2526, players2526 } from '../data/fantasyData'
-import './PremiosPorro.css' // Reutilizamos estilos de pestañas de año
+import './PremiosPorro.css' 
 import './Fantasy.css'
+
+const getUserId = (nombre) => {
+  if (!nombre) return null
+  if (nombre.includes('Paula Edurne')) return 'paula-edurne'
+  if (nombre.includes('Adri')) return 'adri'
+  const clean = nombre.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '').trim().split(' ').pop()
+  const match = USERS.find(u => u.nombre.includes(clean) || clean.includes(u.nombre))
+  return match ? match.id : null
+}
 
 export default function Fantasy() {
   const [selectedSeason, setSelectedSeason] = useState('2025-2026')
@@ -19,46 +30,25 @@ export default function Fantasy() {
           <p>Estadísticas Oficiales Fantasy</p>
         </div>
 
-        {/* Pestañas de Temporadas Principales */}
         <div className="year-tabs">
           <button 
             className={`year-btn ${selectedSeason === '2025-2026' ? 'active' : ''}`}
-            onClick={() => {
-              setSelectedSeason('2025-2026')
-              setSubSelected('clasificacion') // Resetea al cambiar de año
-            }}
+            onClick={() => { setSelectedSeason('2025-2026'); setSubSelected('clasificacion') }}
             style={selectedSeason === '2025-2026' ? { borderColor: '#007AFF', color: '#007AFF', background: 'rgba(0,122,255,0.08)', boxShadow: '0 0 16px rgba(0,122,255,0.15)' } : {}}
-          >
-            25/26
-          </button>
+          >25/26</button>
           <button 
             className={`year-btn ${selectedSeason === '2024-2025' ? 'active' : ''}`}
             onClick={() => setSelectedSeason('2024-2025')}
             style={selectedSeason === '2024-2025' ? { borderColor: '#007AFF', color: '#007AFF', background: 'rgba(0,122,255,0.08)', boxShadow: '0 0 16px rgba(0,122,255,0.15)' } : {}}
-          >
-            24/25
-          </button>
+          >24/25</button>
         </div>
 
-        {/* Subapartados exclusivos para la temporada 2025-2026 */}
         {selectedSeason === '2025-2026' && (
           <div className="sub-tabs">
-            <button 
-              className={`sub-btn ${subSelected === 'clasificacion' ? 'active' : ''}`}
-              onClick={() => setSubSelected('clasificacion')}
-            >
-              Clasificación
-            </button>
-            <button 
-              className={`sub-btn ${subSelected === 'estadisticas' ? 'active' : ''}`}
-              onClick={() => setSubSelected('estadisticas')}
-            >
-              Estadísticas Avanzadas
-            </button>
+            <button className={`sub-btn ${subSelected === 'clasificacion' ? 'active' : ''}`} onClick={() => setSubSelected('clasificacion')}>Clasificación</button>
+            <button className={`sub-btn ${subSelected === 'estadisticas' ? 'active' : ''}`} onClick={() => setSubSelected('estadisticas')}>Estadísticas Avanzadas</button>
           </div>
         )}
-
-        {/* CONTROL DE RENDERIZADO */}
         
         {/* CASO 1: Temporada 25/26 - Subpestaña Clasificación */}
         {selectedSeason === '2025-2026' && subSelected === 'clasificacion' && (
@@ -67,18 +57,23 @@ export default function Fantasy() {
               <h2>Clasificación Final <span style={{ color: '#007AFF' }}>25/26</span></h2>
             </div>
             <div className="legacy-list">
-              {classification2526.map(player => (
-                <div key={player.id} className={`legacy-item ${player.estado}`}>
-                  <div className="legacy-pos">{player.pos}</div>
-                  <div className="legacy-name">{player.nombre}</div>
-                  <div className="legacy-points">{player.puntos} pts</div>
-                </div>
-              ))}
+              {classification2526.map(player => {
+                const uId = getUserId(player.nombre)
+                return (
+                  <div key={player.id} className={`legacy-item ${player.estado}`}>
+                    <div className="legacy-pos">{player.pos}</div>
+                    <div className="legacy-name">
+                      {uId ? <Link to="/perfiles" state={{ userId: uId }} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={(e) => e.target.style.color = '#007AFF'} onMouseOut={(e) => e.target.style.color = 'inherit'}>{player.nombre}</Link> : player.nombre}
+                    </div>
+                    <div className="legacy-points">{player.puntos} pts</div>
+                  </div>
+                )
+              })}
             </div>
           </>
         )}
 
-        {/* CASO 2: Temporada 25/26 - Subpestaña Estadísticas Adaptadas */}
+        {/* CASO 2: Temporada 25/26 - Estadísticas */}
         {selectedSeason === '2025-2026' && subSelected === 'estadisticas' && (
           <>
             <h2 className="section-title">🌍 El Pulso Global</h2>
@@ -96,52 +91,55 @@ export default function Fantasy() {
             </div>
 
             <h2 className="section-title">👤 Radiografías (1x1)</h2>
-            {players2526.map(player => (
-              <div key={player.id} className="player-card">
-                <div className={`player-header ${player.rank}`}>
-                  <div className="player-name">{player.name}</div>
-                  <div className="player-tag">{player.tag}</div>
-                </div>
-                <div className="player-body">
-                  <div className="p-stats-grid">
-                    {player.stats.map((stat, idx) => (
-                      <div key={idx} className="p-stat-item">
-                        <span>{stat.label}</span>
-                        <strong>{stat.val}</strong>
-                      </div>
-                    ))}
+            {players2526.map(player => {
+              const uId = getUserId(player.name)
+              return (
+                <div key={player.id} className="player-card">
+                  <div className={`player-header ${player.rank}`}>
+                    <div className="player-name">
+                      {uId ? <Link to="/perfiles" state={{ userId: uId }} style={{ color: 'inherit', textDecoration: 'none' }}>{player.name}</Link> : player.name}
+                    </div>
+                    <div className="player-tag">{player.tag}</div>
                   </div>
-                  <ul className="key-points">
-                    {player.bullets.map((bullet, idx) => (
-                      <li key={idx} dangerouslySetInnerHTML={{ __html: bullet.text }}></li>
-                    ))}
-                  </ul>
-                  <div className={`financial-box ${player.finance.type}`}>
-                    <span>{player.finance.label}:</span>
-                    <span className="fin-amount">{player.finance.amount}</span>
+                  <div className="player-body">
+                    <div className="p-stats-grid">
+                      {player.stats.map((stat, idx) => (
+                        <div key={idx} className="p-stat-item"><span>{stat.label}</span><strong>{stat.val}</strong></div>
+                      ))}
+                    </div>
+                    <ul className="key-points">
+                      {player.bullets.map((bullet, idx) => (<li key={idx} dangerouslySetInnerHTML={{ __html: bullet.text }}></li>))}
+                    </ul>
+                    <div className={`financial-box ${player.finance.type}`}>
+                      <span>{player.finance.label}:</span>
+                      <span className="fin-amount">{player.finance.amount}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </>
         )}
 
-        {/* CASO 3: Temporada 24/25 - Estilo Unificado */}
+        {/* CASO 3: Temporada 24/25 */}
         {selectedSeason === '2024-2025' && (
           <>
             <div className="edition-heading">
               <h2>Clasificación Final <span style={{ color: '#007AFF' }}>24/25</span></h2>
             </div>
             <div className="legacy-list">
-              {fantasy2425.map(player => (
-                <div key={player.id} className={`legacy-item ${player.estado}`}>
-                  <div className="legacy-pos">{player.pos}</div>
-                  <div className="legacy-name">{player.nombre}</div>
-                  <div className="legacy-points">
-                    {player.puntos} {player.estado === 'activo' && 'pts'}
+              {fantasy2425.map(player => {
+                const uId = getUserId(player.nombre)
+                return (
+                  <div key={player.id} className={`legacy-item ${player.estado}`}>
+                    <div className="legacy-pos">{player.pos}</div>
+                    <div className="legacy-name">
+                      {uId ? <Link to="/perfiles" state={{ userId: uId }} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={(e) => e.target.style.color = '#007AFF'} onMouseOut={(e) => e.target.style.color = 'inherit'}>{player.nombre}</Link> : player.nombre}
+                    </div>
+                    <div className="legacy-points">{player.puntos} {player.estado === 'activo' && 'pts'}</div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         )}

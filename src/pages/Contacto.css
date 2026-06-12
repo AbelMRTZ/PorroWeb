@@ -1,0 +1,135 @@
+/* src/pages/Contacto.css */
+
+.contact-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding-bottom: 50px;
+  animation: fadeIn 0.3s ease;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-top: 20px;
+}
+
+.contact-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), var(--purple-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.contact-header p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* ── Tarjetas de Desarrollador ── */
+.dev-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.dev-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 30px 20px;
+  text-align: center;
+  transition: transform var(--transition), border-color var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dev-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold-light);
+}
+
+.dev-avatar {
+  width: 70px;
+  height: 70px;
+  background: var(--bg-surface2);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 15px;
+  color: var(--text);
+  overflow: hidden; /* Esto es clave para que la foto no se salga del círculo */
+}
+
+/* ── ESTO ES NUEVO: Hace que la foto encaje perfectamente ── */
+.dev-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Evita que la foto se estire o se aplaste */
+}
+
+.dev-card:nth-child(1) .dev-avatar { color: #007AFF; border-color: rgba(0, 122, 255, 0.3); }
+.dev-card:nth-child(2) .dev-avatar { color: var(--purple-light); border-color: rgba(160, 160, 220, 0.3); }
+
+.dev-card h2 {
+  font-size: 1.4rem;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
+.dev-role {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Botón de correo interactivo */
+.contact-btn {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.contact-btn:hover {
+  background: var(--text);
+  color: var(--bg-surface);
+}
+
+/* ── Buzón de sugerencias ── */
+.contact-extra {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(175, 82, 222, 0.05));
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 25px;
+  text-align: center;
+}
+
+.contact-extra h3 {
+  color: var(--gold-light);
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.contact-extra p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}

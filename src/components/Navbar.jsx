@@ -5,10 +5,9 @@ import './Navbar.css'
 
 const navLinks = [
   { to: '/', label: 'Home' },
+  { to: '/porra', label: 'Porra Mundial' },
   { to: '/porrolimpiadas', label: 'Porrolimpiadas' },
   { to: '/premios-porro', label: 'Premios Porro' },
-  { to: '/fantasy', label: 'Fantasy' },
-  { to: '/galeria', label: 'Galería' },
 ]
 
 export default function Navbar() {
@@ -32,7 +31,6 @@ export default function Navbar() {
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-inner">
         <NavLink to="/" className="navbar-logo">
-          <i className="fa-solid fa-bolt logo-icon" aria-hidden="true" />
           <span className="logo-text">La Revolución del Porro</span>
         </NavLink>
 

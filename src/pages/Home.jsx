@@ -4,7 +4,7 @@ import { RobotSpline } from '../components/RobotSpline'
 import { loadEvents } from '../data/eventsStore'
 import './Home.css'
 
-const TABS = ['Inicio', 'Actualidad', 'Accesos Rápidos']
+const TABS = ['Inicio', 'Actualidad', 'Apartados Webs']
 const ROBOT_SCENE = 'https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode'
 
 export default function Home() {
@@ -41,7 +41,7 @@ export default function Home() {
         <div className="tab-panel">
           {activeTab === 'Inicio' && <TabInicio />}
           {activeTab === 'Actualidad' && <TabActualidad />}
-          {activeTab === 'Accesos Rápidos' && <TabAccesos />}
+          {activeTab === 'Apartados Webs' && <TabApartados />}
         </div>
       </section>
     </div>
@@ -106,7 +106,7 @@ function TabInicio() {
         <div className="stats-grid">
           <div className="stat-item">
             <span className="stat-number gold">4</span>
-            <span className="stat-label">Ediciones de Premios</span>
+            <span className="stat-label">Premios Porro</span>
           </div>
           <div className="stat-item">
             <span className="stat-number purple">18</span>
@@ -138,6 +138,7 @@ function TabInicio() {
 }
 
 function TabActualidad() {
+  /* // NOTICIAS DE EJEMPLO (Comentadas hasta que haya noticias reales)
   const noticias = [
     {
       id: 1,
@@ -146,73 +147,84 @@ function TabActualidad() {
       fecha: 'Junio 2025',
       tag: 'General',
     },
-    {
-      id: 2,
-      titulo: 'Noticia 2',
-      resumen: 'Descripción breve de la noticia 2. Aquí irá el contenido relevante para el grupo.',
-      fecha: 'Mayo 2025',
-      tag: 'Premios',
-    },
-    {
-      id: 3,
-      titulo: 'Noticia 3',
-      resumen: 'Descripción breve de la noticia 3. Aquí irá el contenido relevante para el grupo.',
-      fecha: 'Abril 2025',
-      tag: 'Fantasy',
-    },
+    // ...
   ]
+  */
 
   return (
-    <div className="news-grid">
-      {noticias.map(item => (
-        <article key={item.id} className="news-card">
-          <div className="news-card-top">
-            <span className="badge badge-purple">{item.tag}</span>
-            <span className="news-date muted">{item.fecha}</span>
-          </div>
-          <h3 className="news-title">{item.titulo}</h3>
-          <p className="news-text muted">{item.resumen}</p>
-        </article>
-      ))}
+    <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--bg-surface2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+      <i className="fa-solid fa-newspaper" style={{ fontSize: '3rem', color: 'var(--text-dim)', marginBottom: '15px' }}></i>
+      <h2 style={{ marginBottom: '10px', color: 'var(--text)', fontSize: '1.5rem' }}>El tablón está vacío</h2>
+      <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.5' }}>
+        Próximamente iremos publicando aquí las últimas novedades, anuncios y avisos importantes sobre La Revolución del Porro. ¡Mantente atento!
+      </p>
     </div>
   )
 }
 
-function TabAccesos() {
-  const accesos = [
+function TabApartados() {
+  const apartados = [
+    {
+      to: '/perfiles',
+      icon: 'id-card',
+      titulo: 'Buscador de Perfiles',
+      desc: 'Explora las fichas individuales de cada miembro. Consulta sus estadísticas del Fantasy, roles y palmarés.',
+      badge: '¡NUEVO!',
+    },
+    {
+      to: '/porra',
+      icon: 'earth-americas',
+      titulo: 'Porra Mundial',
+      desc: 'Pronostica los resultados del Mundial 2026, consulta la clasificación grupal y compite por el liderato.',
+      badge: 'Mundial',
+    },
     {
       to: '/premios-porro',
       icon: 'trophy',
       titulo: 'Premios Porro',
-      desc: '4 ediciones de premios al estilo Oscar. Consulta los ganadores de cada categoría.',
-      badge: '4 ediciones',
+      desc: '4 ediciones de los galardones oficiales del grupo. Consulta las nominaciones e históricos de ganadores.',
+      badge: 'Premios',
     },
     {
       to: '/porrolimpiadas',
       icon: 'medal',
       titulo: 'Porrolimpiadas',
-      desc: 'Las olimpiadas del grupo. Próximamente con todas sus subsecciones.',
-      badge: 'Próximamente',
+      desc: 'Las olimpiadas del grupo. Marcadores, disciplinas y registros de las competiciones en directo.',
+      badge: 'Competición',
     },
     {
       to: '/fantasy',
       icon: 'futbol',
       titulo: 'Fantasy',
-      desc: 'El juego de Fantasy del grupo. Próximamente con toda la información.',
-      badge: 'Próximamente',
+      desc: 'El rincón del mánager. Clasificaciones históricas, jornadas y puntos de la liga interna.',
+      badge: 'Liga',
     },
     {
       to: '/galeria',
       icon: 'camera',
       titulo: 'Galería',
-      desc: 'Fotos de todos los viajes y momentos del grupo. 5 álbumes disponibles.',
-      badge: '0 álbumes',
+      desc: 'El baúl de los recuerdos. Álbumes fotográficos de todos nuestros viajes, fiestas y eventos.',
+      badge: 'Recuerdos',
+    },
+    {
+      to: '/miembros',
+      icon: 'users',
+      titulo: 'Nuestra Gente',
+      desc: 'La lista completa y ordenada por orden alfabético de los 18 integrantes oficiales del grupo.',
+      badge: 'Grupo',
+    },
+    {
+      to: '/contacto',
+      icon: 'address-book',
+      titulo: 'Soporte y Contacto',
+      desc: '¿Tienes sugerencias o reportes de fallos? Envía un correo directo a los desarrolladores de la web.',
+      badge: 'Soporte',
     },
   ]
 
   return (
     <div className="accesos-grid">
-      {accesos.map(item => (
+      {apartados.map(item => (
         <Link to={item.to} key={item.to} className="acceso-card">
           <div className="acceso-top">
             <i className={`fa-solid fa-${item.icon} acceso-icon`} aria-hidden="true" />
@@ -221,7 +233,7 @@ function TabAccesos() {
           <h3 className="acceso-title">{item.titulo}</h3>
           <p className="acceso-desc muted">{item.desc}</p>
           <span className="acceso-arrow">
-            Ver sección <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+            Entrar a sección <i className="fa-solid fa-arrow-right" aria-hidden="true" />
           </span>
         </Link>
       ))}
