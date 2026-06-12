@@ -255,3 +255,90 @@
     font-size: 0.85rem;
   }
 }
+
+/* 🚀 ESTILOS DEL NUEVO DESPLEGABLE DE APARTADOS WEBS */
+.nav-dropdown-container {
+  position: relative;
+}
+
+.dropdown-toggle {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--bg-surface, #1e1e1e);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.nav-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-item {
+  padding: 12px 20px;
+  color: var(--text-muted, #aaa);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-item i {
+  width: 24px;
+  text-align: center;
+  margin-right: 10px;
+  font-size: 1.1rem;
+}
+
+.nav-dropdown-item:hover, .nav-dropdown-item.active {
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--gold, #ffd700);
+}
+
+/* En móvil, el desplegable empuja los elementos hacia abajo en vez de flotar */
+@media (max-width: 768px) {
+  .nav-dropdown-menu {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 0 10px 15px;
+    margin-top: 5px;
+    visibility: hidden;
+    display: none;
+    width: 100%;
+  }
+  
+  .nav-dropdown-menu.show {
+    visibility: visible;
+    display: flex;
+    transform: none;
+  }
+}

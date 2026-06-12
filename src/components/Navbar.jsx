@@ -1,24 +1,36 @@
+// src/components/Navbar.jsx
+
 import { useState, useEffect } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './Navbar.css'
 
-const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/porra', label: 'Porra Mundial' },
-  { to: '/galeria', label: 'Galeria' },
-  { to: '/porrolimpiadas', label: 'Porrolimpiadas' },
-  { to: '/premios-porro', label: 'Premios Porro' },
+// 🚀 Lista completa de todos los apartados de la web con sus iconos
+const apartadosLinks = [
+  { to: '/perfiles', label: 'Buscador de Perfiles', icon: 'id-card' },
+  { to: '/porra', label: 'Porra Mundial', icon: 'earth-americas' },
+  { to: '/premios-porro', label: 'Premios Porro', icon: 'trophy' },
+  { to: '/porrolimpiadas', label: 'Porrolimpiadas', icon: 'medal' },
+  { to: '/fantasy', label: 'Fantasy', icon: 'futbol' },
+  { to: '/galeria', label: 'Galería', icon: 'camera' },
+  { to: '/miembros', label: 'Nuestra Gente', icon: 'users' },
+  { to: '/contacto', label: 'Soporte y Contacto', icon: 'address-book' },
 ]
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false) // 🚀 Estado para el desplegable
+  
   const location = useLocation()
   const { user, isAdmin, logout } = useAuth()
 
-  useEffect(() => { setMenuOpen(false); setUserMenuOpen(false) }, [location])
+  useEffect(() => { 
+    setMenuOpen(false); 
+    setUserMenuOpen(false);
+    setDropdownOpen(false); // Cierra el desplegable al cambiar de página
+  }, [location])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -44,31 +56,55 @@ export default function Navbar() {
         </button>
 
         <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          {navLinks.map(({ to, label }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end={to === '/'}
-                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-              >
-                {label}
-              </NavLink>
-            </li>
-          ))}
+          {/* Link individual de Home */}
+          <li>
+            <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              Home
+            </NavLink>
+          </li>
+
+          {/* 🚀 MENÚ DESPLEGABLE: Apartados Webs */}
+          <li 
+            className="nav-dropdown-container"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <button 
+              className={`nav-link dropdown-toggle ${dropdownOpen ? 'active' : ''}`}
+              onClick={() => setDropdownOpen(v => !v)}
+            >
+              Apartados Webs <i className="fa-solid fa-chevron-down" style={{ fontSize: '0.8em', marginLeft: '6px' }}></i>
+            </button>
+
+            <div className={`nav-dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
+              {apartadosLinks.map(({ to, label, icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) => `nav-dropdown-item${isActive ? ' active' : ''}`}
+                >
+                  <i className={`fa-solid fa-${icon}`} aria-hidden="true"></i>
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </li>
+
+          {/* Link individual de Admin (Intacto) */}
           {isAdmin && (
             <li>
               <NavLink
                 to="/admin"
                 className={({ isActive }) => `nav-link nav-link-admin${isActive ? ' active' : ''}`}
               >
-                <i className="fa-solid fa-shield-halved" aria-hidden="true" />
+                <i className="fa-solid fa-shield-halved" aria-hidden="true" style={{ marginRight: '6px' }} />
                 Admin
               </NavLink>
             </li>
           )}
         </ul>
 
-        {/* User avatar */}
+        {/* User avatar (Intacto) */}
         <div className="navbar-user">
           <button
             className="user-avatar-btn metal-avatar"
