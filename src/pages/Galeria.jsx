@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { loadTrips } from '../data/tripsStore'
-import { loadPhotosForTrip, uploadPhoto, deletePhoto, getPhotoUrl } from '../data/galleryStore'
+import { loadPhotosForTrip, uploadPhoto, deletePhoto, getPhotoUrl, loadAllPhotoCounts } from '../data/galleryStore'
 import { useAuth } from '../context/AuthContext'
 import './Galeria.css'
 
@@ -19,18 +19,21 @@ export default function Galeria() {
   const [tripsLoading, setTripsLoading] = useState(true)
   const [photos, setPhotos] = useState([])
   const [photosLoading, setPhotosLoading] = useState(false)
+  const [photoCounts, setPhotoCounts] = useState({}) // 🚀 Estado de contadores globales
   const [lightbox, setLightbox] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
-  // Load trips once on mount
+  // 🚀 Cargar viajes y el recuento de fotos al mismo tiempo
   useEffect(() => {
-    loadTrips()
-      .then(setTrips)
+    Promise.all([loadTrips(), loadAllPhotoCounts()])
+      .then(([tripsData, countsData]) => {
+        setTrips(tripsData)
+        setPhotoCounts(countsData)
+      })
       .finally(() => setTripsLoading(false))
   }, [])
 
-  // Redirect to first trip when none selected
   useEffect(() => {
     if (!tripsLoading && !tripSlug && trips.length > 0) {
       navigate(`/galeria/${trips[0].slug}`, { replace: true })
@@ -39,7 +42,6 @@ export default function Galeria() {
 
   const currentTrip = trips.find(t => t.slug === tripSlug) ?? trips[0]
 
-  // Load photos whenever the active trip changes
   useEffect(() => {
     if (!currentTrip) return
     setPhotosLoading(true)
@@ -72,10 +74,24 @@ export default function Galeria() {
     setUploading(true)
     setUploadError('')
 
-    for (const file of files) {
+    // 🚀 VALIDACIÓN ESTRICTA: Filtramos para dejar solo archivos de imagen
+    const validFiles = files.filter(file => file.type.startsWith('image/'))
+    
+    if (validFiles.length !== files.length) {
+      setUploadError('Se han bloqueado algunos archivos. Solo se permiten subir imágenes o fotos.')
+    }
+
+    // Subimos solo los válidos
+    for (const file of validFiles) {
       try {
         const photo = await uploadPhoto(currentTrip.id, currentTrip.slug, file, user?.nombre ?? 'Anónimo')
         setPhotos(prev => [...prev, photo])
+        
+        // Actualizamos el contador global para que el menú lateral suba en tiempo real
+        setPhotoCounts(prev => ({
+          ...prev,
+          [currentTrip.slug]: (prev[currentTrip.slug] || 0) + 1
+        }))
       } catch (err) {
         setUploadError(
           err.message?.includes('storage')
@@ -93,13 +109,21 @@ export default function Galeria() {
     try {
       await deletePhoto(photo)
       setPhotos(prev => prev.filter(p => p.id !== photo.id))
+      
+      // Restamos del contador global
+      setPhotoCounts(prev => ({
+        ...prev,
+        [currentTrip.slug]: Math.max(0, (prev[currentTrip.slug] || 1) - 1)
+      }))
+
       if (lightbox?.id === photo.id) setLightbox(null)
     } catch { /* ignore */ }
   }
 
+  // 🚀 Función actualizada para devolver siempre el número real de fotos
   const photoCount = (trip) => {
     if (trip.slug === currentTrip?.slug) return photos.length
-    return '…'
+    return photoCounts[trip.slug] || 0
   }
 
   if (tripsLoading) return null
@@ -158,6 +182,7 @@ export default function Galeria() {
           </div>
 
           <div className="galeria-header-right">
+            {/* 🚀 Atributo accept="image/*" fuerza a nivel visual, la validación JS fuerza a nivel sistema */}
             <input
               ref={fileInputRef}
               type="file"
