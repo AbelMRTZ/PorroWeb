@@ -1,5 +1,19 @@
 import { supabase } from '../lib/supabase'
 
+// 🚀 NUEVA FUNCIÓN: Cuenta las fotos de todos los viajes para el menú lateral
+export async function loadAllPhotoCounts() {
+  const { data, error } = await supabase.from('photos').select('trip_slug')
+  if (error) return {}
+  
+  const counts = {}
+  if (data) {
+    data.forEach(p => {
+      counts[p.trip_slug] = (counts[p.trip_slug] || 0) + 1
+    })
+  }
+  return counts
+}
+
 export async function loadPhotosForTrip(tripSlug) {
   const { data, error } = await supabase
     .from('photos')

@@ -4,7 +4,7 @@ export async function loadTrips() {
   const { data, error } = await supabase
     .from('trips')
     .select('*')
-    .order('fecha', { ascending: true })
+    .order('fecha', { ascending: false }) // 🚀 CAMBIO: false para mostrar lo más reciente primero
   if (error) throw error
   return data ?? []
 }
@@ -31,7 +31,6 @@ export async function updateTrip(tripId, { nombre, fecha, descripcion }) {
 }
 
 export async function deleteTrip(tripId) {
-  // Remove Storage files before deleting (cascade only removes DB rows)
   const { data: photos } = await supabase
     .from('photos')
     .select('storage_path')
