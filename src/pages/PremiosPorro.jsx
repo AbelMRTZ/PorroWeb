@@ -121,7 +121,7 @@ function CategoriaCard({ categoria }) {
                 </div>
                 {pct !== undefined && pct > 0 && (
                   <div className="nominado-bar-wrap">
-                    <div className="nominado-bar" style={{ width: `${(pct / maxPct) * 100}%` }} />
+                    <div className={`nominado-bar${won ? ' nominado-bar-winner' : ''}`} style={{ width: `${(pct / maxPct) * 100}%` }} />
                   </div>
                 )}
               </li>
