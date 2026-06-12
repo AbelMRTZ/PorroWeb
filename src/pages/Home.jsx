@@ -4,7 +4,7 @@ import { RobotSpline } from '../components/RobotSpline'
 import { loadEvents } from '../data/eventsStore'
 import './Home.css'
 
-const TABS = ['Inicio', 'Actualidad', 'Apartados Webs']
+const TABS = ['Inicio', 'Apartados Webs', 'Actualidad']
 const ROBOT_SCENE = 'https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode'
 
 export default function Home() {
@@ -40,8 +40,8 @@ export default function Home() {
 
         <div className="tab-panel">
           {activeTab === 'Inicio' && <TabInicio />}
-          {activeTab === 'Actualidad' && <TabActualidad />}
           {activeTab === 'Apartados Webs' && <TabApartados />}
+          {activeTab === 'Actualidad' && <TabActualidad />}
         </div>
       </section>
     </div>
