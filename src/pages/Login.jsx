@@ -11,21 +11,21 @@ const STEP = { SELECT: 'select', NEW: 'new', ENTER: 'enter' }
 // Base de datos local de códigos de activación secretos
 const CODIGOS_ACTIVACION = {
   'abel': 'biciplaneazul',
-  'adrian': 'cochetrennegro',
-  'alba': 'sillapapelnubes',
+  'adri': 'cochetrennegro',          // Corregido (antes adrian)
+  'albas': 'sillapapelnubes',        // Corregido (antes alba)
   'andrea': 'osoleontigre',
   'clara': 'llavepuertablanca',
   'cristina': 'lapizbiciverde',
   'isabel': 'ventanasuelorojo',
   'jorge': 'libromesaazul',
-  'joseantonio': 'solplayaverde',
+  'jose': 'solplayaverde',           // Corregido (antes joseantonio, porque en users es "Jose")
   'juanfran': 'mototrenazul',
-  'laurabanon': 'librocasagato',
-  'lauralorenzo': 'playazulperro',
+  'laurab': 'librocasagato',         // Corregido (antes laurabanon)
+  'laural': 'playazulperro',         // Corregido (antes lauralorenzo)
   'mariaju': 'mesasillablanca',
-  'paulamoris': 'aviontigrenegro',
-  'paularomero': 'nubesolmonte',
-  'raquel': 'cochegatoverde',
+  'paulam': 'aviontigrenegro',       // Corregido (antes paulamoris)
+  'paulaedurne': 'nubesolmonte',     // Corregido (antes paularomero)
+  'raquelg': 'cochegatoverde',       // Corregido (antes raquel)
   'sergio': 'perrogatocasa',
   'silvia': 'papelpuertaazul'
 }
