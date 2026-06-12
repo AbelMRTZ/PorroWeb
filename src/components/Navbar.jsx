@@ -6,6 +6,7 @@ import './Navbar.css'
 const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/porra', label: 'Porra Mundial' },
+  { to: '/galeria', label: 'Galeria' },
   { to: '/porrolimpiadas', label: 'Porrolimpiadas' },
   { to: '/premios-porro', label: 'Premios Porro' },
 ]

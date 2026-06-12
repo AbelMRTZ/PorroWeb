@@ -1,3 +1,5 @@
+// src/pages/Galeria.jsx
+
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { loadTrips } from '../data/tripsStore'
@@ -19,12 +21,11 @@ export default function Galeria() {
   const [tripsLoading, setTripsLoading] = useState(true)
   const [photos, setPhotos] = useState([])
   const [photosLoading, setPhotosLoading] = useState(false)
-  const [photoCounts, setPhotoCounts] = useState({}) // 🚀 Estado de contadores globales
+  const [photoCounts, setPhotoCounts] = useState({})
   const [lightbox, setLightbox] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
-  // 🚀 Cargar viajes y el recuento de fotos al mismo tiempo
   useEffect(() => {
     Promise.all([loadTrips(), loadAllPhotoCounts()])
       .then(([tripsData, countsData]) => {
@@ -74,20 +75,17 @@ export default function Galeria() {
     setUploading(true)
     setUploadError('')
 
-    // 🚀 VALIDACIÓN ESTRICTA: Filtramos para dejar solo archivos de imagen
     const validFiles = files.filter(file => file.type.startsWith('image/'))
     
     if (validFiles.length !== files.length) {
       setUploadError('Se han bloqueado algunos archivos. Solo se permiten subir imágenes o fotos.')
     }
 
-    // Subimos solo los válidos
     for (const file of validFiles) {
       try {
         const photo = await uploadPhoto(currentTrip.id, currentTrip.slug, file, user?.nombre ?? 'Anónimo')
         setPhotos(prev => [...prev, photo])
         
-        // Actualizamos el contador global para que el menú lateral suba en tiempo real
         setPhotoCounts(prev => ({
           ...prev,
           [currentTrip.slug]: (prev[currentTrip.slug] || 0) + 1
@@ -110,7 +108,6 @@ export default function Galeria() {
       await deletePhoto(photo)
       setPhotos(prev => prev.filter(p => p.id !== photo.id))
       
-      // Restamos del contador global
       setPhotoCounts(prev => ({
         ...prev,
         [currentTrip.slug]: Math.max(0, (prev[currentTrip.slug] || 1) - 1)
@@ -120,7 +117,6 @@ export default function Galeria() {
     } catch { /* ignore */ }
   }
 
-  // 🚀 Función actualizada para devolver siempre el número real de fotos
   const photoCount = (trip) => {
     if (trip.slug === currentTrip?.slug) return photos.length
     return photoCounts[trip.slug] || 0
@@ -146,7 +142,6 @@ export default function Galeria() {
   return (
     <div className="galeria-page">
 
-      {/* ── Sidebar ── */}
       <aside className="galeria-sidebar">
         <h2 className="sidebar-title">Galería</h2>
         <nav className="sidebar-nav">
@@ -168,7 +163,6 @@ export default function Galeria() {
         </nav>
       </aside>
 
-      {/* ── Main ── */}
       <main className="galeria-main">
         <div className="galeria-main-header">
           <div className="galeria-header-left">
@@ -182,7 +176,6 @@ export default function Galeria() {
           </div>
 
           <div className="galeria-header-right">
-            {/* 🚀 Atributo accept="image/*" fuerza a nivel visual, la validación JS fuerza a nivel sistema */}
             <input
               ref={fileInputRef}
               type="file"
@@ -230,28 +223,37 @@ export default function Galeria() {
           </div>
         ) : (
           <div className="fotos-grid">
-            {photos.map(foto => (
-              <div key={foto.id} className="foto-thumb-wrap">
-                <button
-                  className="foto-thumb"
-                  onClick={() => setLightbox(foto)}
-                  aria-label={foto.name}
-                >
-                  <img src={getPhotoUrl(foto.storage_path)} alt={foto.name} className="foto-img" />
-                  <span className="foto-overlay">
-                    <i className="fa-solid fa-magnifying-glass foto-icon" aria-hidden="true" />
-                  </span>
-                </button>
-                <button
-                  className="foto-delete"
-                  onClick={() => handleDeletePhoto(foto)}
-                  aria-label="Eliminar foto"
-                  title={`Subida por ${foto.uploaded_by}`}
-                >
-                  <i className="fa-solid fa-xmark" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
+            {photos.map(foto => {
+              // 🚀 COMPROBACIÓN DE PERMISOS: Solo el dueño o los admins (Sergio y Abel) pueden borrar
+              const puedeBorrar = isAdmin || foto.uploaded_by === user?.nombre;
+
+              return (
+                <div key={foto.id} className="foto-thumb-wrap">
+                  <button
+                    className="foto-thumb"
+                    onClick={() => setLightbox(foto)}
+                    aria-label={foto.name}
+                  >
+                    <img src={getPhotoUrl(foto.storage_path)} alt={foto.name} className="foto-img" />
+                    <span className="foto-overlay">
+                      <i className="fa-solid fa-magnifying-glass foto-icon" aria-hidden="true" />
+                    </span>
+                  </button>
+                  
+                  {/* El botón de borrar solo se dibuja si cumple la condición */}
+                  {puedeBorrar && (
+                    <button
+                      className="foto-delete"
+                      onClick={() => handleDeletePhoto(foto)}
+                      aria-label="Eliminar foto"
+                      title={`Subida por ${foto.uploaded_by}`}
+                    >
+                      <i className="fa-solid fa-xmark" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </main>
