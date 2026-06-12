@@ -1,3 +1,5 @@
+// src/pages/Admin.jsx
+
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -6,11 +8,17 @@ import { uploadPhoto, compressToBlob } from '../data/galleryStore'
 import { loadEvents, createEvent, updateEventsOrder, deleteEvent } from '../data/eventsStore'
 import './Admin.css'
 
+// Formateo visual seguro para la lista
 function formatFecha(fecha) {
   if (!fecha) return ''
-  const [y, m, d] = String(fecha).slice(0, 10).split('-')
-  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-  return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`
+  try {
+    const [y, m, d] = String(fecha).split('T')[0].split('-')
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+    if (!y || !m || !d) return String(fecha).slice(0, 10)
+    return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`
+  } catch (e) {
+    return String(fecha).slice(0, 10)
+  }
 }
 
 export default function Admin() {
@@ -114,14 +122,22 @@ export default function Admin() {
     setSaving(false)
   }
 
+  // 🚀 FUNCIÓN BLINDADA PARA ABRIR LA EDICIÓN SIN ERRORES
   function startEdit(trip) {
-    setEditingId(trip.id)
+    let safeDate = '';
+    if (trip.fecha) {
+      // Forzamos a que extraiga siempre YYYY-MM-DD
+      const f = String(trip.fecha);
+      safeDate = f.includes('T') ? f.split('T')[0] : f.slice(0, 10);
+    }
+
     setEditForm({
-      nombre: trip.nombre,
-      fecha: String(trip.fecha).slice(0, 10),
-      descripcion: trip.descripcion ?? '',
+      nombre: trip.nombre || '',
+      fecha: safeDate,
+      descripcion: trip.descripcion || '',
     })
     setEditError('')
+    setEditingId(trip.id)
   }
 
   function cancelEdit() {
@@ -418,6 +434,7 @@ export default function Admin() {
                       )}
                     </div>
                     <div className="admin-trip-actions">
+                      {/* ⚠️ ¡AQUÍ ES DONDE TIENES QUE HACER CLIC PARA EDITAR! ⚠️ */}
                       <button
                         className="admin-edit-btn"
                         onClick={() => startEdit(trip)}
@@ -442,6 +459,7 @@ export default function Admin() {
           </div>
         )}
       </section>
+      
       {/* ── Eventos ── */}
       <section className="admin-section">
         <h2 className="admin-section-title">

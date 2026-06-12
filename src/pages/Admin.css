@@ -278,55 +278,48 @@
   text-overflow: ellipsis;
 }
 
-.admin-delete-btn {
-  background: none;
-  border: 1px solid transparent;
-  color: var(--text-dim);
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  transition: color var(--transition), border-color var(--transition), background var(--transition);
-  flex-shrink: 0;
-}
-
-.admin-delete-btn:hover {
-  color: #ff6060;
-  border-color: rgba(255, 96, 96, 0.3);
-  background: rgba(255, 96, 96, 0.1);
-}
-
 .admin-empty-text {
   font-size: 0.9rem;
   padding: 4px 0;
 }
 
-/* ── Trip actions (edit + delete) ── */
+/* 🚀 BOTONES DE EDITAR Y BORRAR VIAJE VISIBLES Y CLAROS */
 .admin-trip-actions {
   display: flex;
-  gap: 4px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
-.admin-edit-btn {
-  background: none;
-  border: 1px solid transparent;
-  color: var(--text-dim);
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  transition: color var(--transition), border-color var(--transition), background var(--transition);
+.admin-edit-btn,
+.admin-delete-btn {
+  background: var(--bg-surface2, #2a2a2a) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--border, #444) !important;
+  border-radius: var(--radius, 6px) !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-edit-btn i,
+.admin-delete-btn i {
+  font-size: 14px !important;
 }
 
 .admin-edit-btn:hover {
-  color: var(--gold);
-  border-color: rgba(212, 175, 55, 0.3);
-  background: rgba(212, 175, 55, 0.08);
+  background: rgba(255, 215, 0, 0.1) !important;
+  color: var(--gold, #ffd700) !important;
+  border-color: var(--gold, #ffd700) !important;
+}
+
+.admin-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
 }
 
 /* ── Inline edit form ── */

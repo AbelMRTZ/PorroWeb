@@ -1,3 +1,5 @@
+// src/pages/Home.jsx
+
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { RobotSpline } from '../components/RobotSpline'
@@ -5,6 +7,7 @@ import { loadEvents } from '../data/eventsStore'
 import './Home.css'
 
 const TABS = ['Inicio', 'Apartados Webs', 'Actualidad']
+// 🚀 Recuperamos el enlace de tu escena 3D de Spline
 const ROBOT_SCENE = 'https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode'
 
 export default function Home() {
@@ -15,11 +18,18 @@ export default function Home() {
       <section className="hero">
         <div className="hero-glow hero-glow-left" />
         <div className="hero-glow hero-glow-right" />
+        
+        {/* 🚀 El robot vuelve a su sitio como fondo interactivo */}
         <div className="hero-robot-wrap" aria-hidden="true">
           <RobotSpline scene={ROBOT_SCENE} />
         </div>
+
         <div className="hero-content">
-          <i className="fa-solid fa-smoking hero-icon" aria-hidden="true" />
+          <img 
+            src="/favicon.png?v=3" 
+            alt="Logo PorroWeb" 
+            className="hero-logo-img"
+          />
           <h1 className="hero-title">La Revolución del Porro</h1>
           <p className="hero-subtitle">Todo en un lugar. Todos en una web.</p>
         </div>
@@ -138,19 +148,6 @@ function TabInicio() {
 }
 
 function TabActualidad() {
-  /* // NOTICIAS DE EJEMPLO (Comentadas hasta que haya noticias reales)
-  const noticias = [
-    {
-      id: 1,
-      titulo: 'Noticia 1',
-      resumen: 'Descripción breve de la noticia 1. Aquí irá el contenido relevante para el grupo.',
-      fecha: 'Junio 2025',
-      tag: 'General',
-    },
-    // ...
-  ]
-  */
-
   return (
     <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--bg-surface2)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
       <i className="fa-solid fa-newspaper" style={{ fontSize: '3rem', color: 'var(--text-dim)', marginBottom: '15px' }}></i>
