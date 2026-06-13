@@ -14,6 +14,7 @@ const apartadosLinks = [
   { to: '/fantasy', label: 'Fantasy', icon: 'futbol' },
   { to: '/galeria', label: 'Galería', icon: 'camera' },
   { to: '/miembros', label: 'Nuestra Gente', icon: 'users' },
+  { to: '/cubatometro', label: 'Cubatómetro', icon: 'beer-mug-empty' },
   { to: '/contacto', label: 'Soporte y Contacto', icon: 'address-book' },
 ]
 

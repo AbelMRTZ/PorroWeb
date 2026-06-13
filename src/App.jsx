@@ -17,6 +17,7 @@ import Miembros from './pages/Miembros'
 import Porra from './pages/Porra'
 import AdminPorra from './pages/AdminPorra'
 import Perfiles from './pages/Perfiles'
+import Cubatometro from './pages/Cubatometro'
 
 function App() {
   const { user, authLoading } = useAuth()
@@ -46,6 +47,7 @@ function App() {
           <Route path="/porra" element={<RequireAuth><Porra /></RequireAuth>} />
           <Route path="/admin/porra" element={<RequireAuth><AdminPorra /></RequireAuth>} />
           <Route path="/perfiles" element={<RequireAuth><Perfiles /></RequireAuth>} />
+          <Route path="/cubatometro" element={<RequireAuth><Cubatometro /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

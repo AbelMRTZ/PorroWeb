@@ -211,12 +211,19 @@ function TabApartados() {
       badge: 'Grupo',
     },
     {
+      to: '/cubatometro',
+      icon: 'beer-mug-empty',
+      titulo: 'Cubatómetro',
+      desc: 'Clasificación etílica del grupo. Registra tus cubatas, chupitos y cervezas y compite por el podio de la noche.',
+      badge: '¡NUEVO!',
+    },
+    {
       to: '/contacto',
       icon: 'address-book',
       titulo: 'Soporte y Contacto',
       desc: '¿Tienes sugerencias o reportes de fallos? Envía un correo directo a los desarrolladores de la web.',
       badge: 'Soporte',
-    },
+    }
   ]
 
   return (
