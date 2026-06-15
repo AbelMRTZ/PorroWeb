@@ -63,7 +63,7 @@
   gap: 15px;
 }
 
-.partido-card {
+.partio-card, .partido-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -177,6 +177,41 @@
   color: var(--text-dim);
   font-weight: 600;
   text-transform: uppercase;
+}
+
+/* ── 🚀 SECCIÓN DE PARTIDOS ARCHIVADOS ── */
+.archivados-container {
+  margin-bottom: 35px;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 25px;
+}
+
+.btn-archivados-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-archivados-toggle:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-light);
+}
+
+.archivados-content {
+  margin-top: 15px;
+  animation: fadeIn 0.3s ease;
 }
 
 @media (max-width: 600px) {

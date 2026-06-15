@@ -16,13 +16,26 @@ const comprobarPartidoComenzado = (timestamp) => {
   return Date.now() >= msPartido
 }
 
+// Comprueba si han transcurrido 3 horas o más desde el inicio del partido
+const comprobarPartidoArchivado = (timestamp) => {
+  if (!timestamp) return false
+  const msPartido = new Date(timestamp).getTime()
+  if (isNaN(msPartido)) return false
+  const TRES_HORAS_MS = 3 * 60 * 60 * 1000
+  return Date.now() >= (msPartido + TRES_HORAS_MS)
+}
+
 export default function Porra() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('miporra')
   const [misResultados, setMisResultados] = useState({})
-  const [resultadosOriginales, setResultadosOriginales] = useState({}) // 🛡️ RESPALDO ANTI-TRAMPAS
+  const [resultadosOriginales, setResultadosOriginales] = useState({}) 
   const [loadingGuardar, setLoadingGuardar] = useState(false)
   
+  // Estados de control para los acordeones de partidos archivados
+  const [archivadosOpenMiPorra, setArchivadosOpenMiPorra] = useState(false)
+  const [archivadosOpenGrupo, setArchivadosOpenGrupo] = useState(false)
+
   // Estados para la clasificación
   const [clasificacion, setClasificacion] = useState([])
   const [loadingClasi, setLoadingClasi] = useState(false)
@@ -31,6 +44,11 @@ export default function Porra() {
   const [miembroSeleccionado, setMiembroSeleccionado] = useState('Abel')
   const [porraOtro, setPorraOtro] = useState(null)
   const [cargandoOtro, setCargandoOtro] = useState(false)
+
+  // Estados para el resumen global
+  const [pronosticosGlobales, setPronosticosGlobales] = useState({})
+  const [loadingGlobal, setLoadingGlobal] = useState(false)
+  const [expandedMatch, setExpandedMatch] = useState(null) 
   
   const miembros = USERS.map(u => u.nombre).sort()
 
@@ -45,7 +63,6 @@ export default function Porra() {
           resultadosGuardados[p.partido_id] = { local: p.goles_local, visitante: p.goles_visitante }
         })
         setMisResultados(resultadosGuardados)
-        // Guardamos una copia exacta para saber qué se modifica en tiempo real
         setResultadosOriginales(JSON.parse(JSON.stringify(resultadosGuardados)))
       }
     }
@@ -79,6 +96,37 @@ export default function Porra() {
     }
   }, [activeTab, miembroSeleccionado])
 
+  // ── 4. CARGAR RESUMEN GLOBAL ──
+  useEffect(() => {
+    if (activeTab === 'resumen') {
+      async function cargarResumenGlobal() {
+        setLoadingGlobal(true)
+        const { data: pronosticos } = await supabase.from('porra_pronosticos').select('*')
+        if (pronosticos) {
+          const agrupados = {}
+          pronosticos.forEach(p => {
+            if (!agrupados[p.partido_id]) agrupados[p.partido_id] = []
+            const userObj = USERS.find(u => u.id === p.user_id)
+            if (userObj) {
+              agrupados[p.partido_id].push({
+                nombre: userObj.nombre,
+                color: userObj.color,
+                local: p.goles_local,
+                visitante: p.goles_visitante
+              })
+            }
+          })
+          Object.keys(agrupados).forEach(k => {
+            agrupados[k].sort((a, b) => a.nombre.localeCompare(b.nombre))
+          })
+          setPronosticosGlobales(agrupados)
+        }
+        setLoadingGlobal(false)
+      }
+      cargarResumenGlobal()
+    }
+  }, [activeTab])
+
   const handleScoreChange = (partidoId, tipo, valor) => {
     setMisResultados(prev => ({
       ...prev,
@@ -89,7 +137,7 @@ export default function Porra() {
     }))
   }
 
-  // ── 4. GUARDAR Y VERIFICACIÓN DE SEGURIDAD EN EL CLICK ──
+  // ── GUARDAR Y VERIFICACIÓN DE SEGURIDAD ──
   const handleGuardarProgreso = async () => {
     setLoadingGuardar(true)
     const ahora = Date.now()
@@ -100,21 +148,18 @@ export default function Porra() {
         const tieneDatos = marcador.local !== '' && marcador.visitante !== '' && marcador.local !== undefined
         if (!tieneDatos) return false
 
-        // Comparamos el marcador actual con el que cargó la base de datos al inicio
         const orig = resultadosOriginales[partidoId]
         const haCambiado = !orig || orig.local !== marcador.local || orig.visitante !== marcador.visitante
         
-        // Si no se ha modificado en esta sesión, lo ignoramos (evita falsos positivos con partidos antiguos)
         if (!haCambiado) return false
 
         const partido = partidosFaseGrupos.find(p => p.id === Number(partidoId))
         if (!partido) return false
 
-        // 🛡️ CAPA DE SEGURIDAD EN EL BOTÓN: ¿Ha empezado ya el partido en este milisegundo?
         const yaEmpezo = ahora >= new Date(partido.timestamp).getTime()
         if (yaEmpezo) {
           partidosTrampa.push(`${partido.banderaLocal} ${partido.equipoLocal} vs ${partido.equipoVisitante} ${partido.banderaVisitante}`)
-          return false // Lo eliminamos de la lista de subida
+          return false
         }
         return true
       })
@@ -125,14 +170,12 @@ export default function Porra() {
         goles_visitante: marcador.visitante
       }))
 
-    // Alerta si alguien ha intentado burlar el reloj o se le ha pasado la hora con la página abierta
     if (partidosTrampa.length > 0) {
       alert(`🚨 ¡ACCESO DE TIEMPO EXPIRADO!\n\nNo se han guardado los pronósticos para:\n${partidosTrampa.join('\n')}\n\nMotivo: El partido ya ha comenzado en la vida real. Las trampas no están permitidas en esta federación.`);
     }
 
     if (datosAInsertar.length > 0) {
       await supabase.from('porra_pronosticos').upsert(datosAInsertar)
-      // Actualizamos el respaldo original para la siguiente tanda de cambios
       setResultadosOriginales(JSON.parse(JSON.stringify(misResultados)))
       alert("¡Tus pronósticos válidos han sido guardados en Supabase!")
     } else if (partidosTrampa.length === 0) {
@@ -199,6 +242,9 @@ export default function Porra() {
           <button className={`tab-btn ${activeTab === 'grupo' ? 'active' : ''}`} onClick={() => setActiveTab('grupo')}>
             Porras del Grupo
           </button>
+          <button className={`tab-btn ${activeTab === 'resumen' ? 'active' : ''}`} onClick={() => setActiveTab('resumen')}>
+            Resumen Global
+          </button>
         </div>
 
         {/* ── MI PORRA ── */}
@@ -222,38 +268,78 @@ export default function Porra() {
               </button>
             </div>
 
+            {/* Sección Acordeón: Partidos Archivados (> 3h) */}
+            {partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length > 0 && (
+              <div className="archivados-container">
+                <button 
+                  className="btn-archivados-toggle" 
+                  onClick={() => setArchivadosOpenMiPorra(!archivadosOpenMiPorra)}
+                >
+                  <i className={`fa-solid ${archivadosOpenMiPorra ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                  {archivadosOpenMiPorra ? 'Ocultar Partidos Finalizados' : `Ver Partidos Archivados / Finalizados (${partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length})`}
+                </button>
+
+                {archivadosOpenMiPorra && (
+                  <div className="partidos-list archivados-content">
+                    {partidosFaseGrupos
+                      .filter(p => comprobarPartidoArchivado(p.timestamp))
+                      .map(partido => (
+                        <div key={partido.id} className="partido-card" style={{ opacity: 0.65 }}>
+                          <div className="partido-info">
+                            <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} • ARCHIVADO 🔒</span>
+                            <div className="equipos-wrap">
+                              <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                              <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
+                              <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                            </div>
+                          </div>
+                          <div className="marcador-inputs">
+                            <input type="number" disabled value={misResultados[partido.id]?.local ?? '-'} />
+                            <span>-</span>
+                            <input type="number" disabled value={misResultados[partido.id]?.visitante ?? '-'} />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Renderizado de Partidos Activos */}
             <div className="partidos-list">
-              {partidosFaseGrupos.map(partido => {
-                const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
-                return (
-                  <div key={partido.id} className="partido-card">
-                    <div className="partido-info">
-                      <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
-                      <div className="equipos-wrap">
-                        <span>{partido.banderaLocal} {partido.equipoLocal}</span>
-                        <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
-                        <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+              {partidosFaseGrupos
+                .filter(p => !comprobarPartidoArchivado(p.timestamp))
+                .map(partido => {
+                  const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
+                  return (
+                    <div key={partido.id} className="partido-card">
+                      <div className="partido-info">
+                        <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
+                        <div className="equipos-wrap">
+                          <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                          <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
+                          <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="marcador-inputs">
+                        <input 
+                          type="number" min="0" disabled={bloqueadoPorTiempo}
+                          value={misResultados[partido.id]?.local ?? ''}
+                          onChange={(e) => handleScoreChange(partido.id, 'local', e.target.value)}
+                          placeholder="-"
+                        />
+                        <span>-</span>
+                        <input 
+                          type="number" min="0" disabled={bloqueadoPorTiempo}
+                          value={misResultados[partido.id]?.visitante ?? ''}
+                          onChange={(e) => handleScoreChange(partido.id, 'visitante', e.target.value)}
+                          placeholder="-"
+                        />
                       </div>
                     </div>
-                    
-                    <div className="marcador-inputs">
-                      <input 
-                        type="number" min="0" disabled={bloqueadoPorTiempo}
-                        value={misResultados[partido.id]?.local ?? ''}
-                        onChange={(e) => handleScoreChange(partido.id, 'local', e.target.value)}
-                        placeholder="-"
-                      />
-                      <span>-</span>
-                      <input 
-                        type="number" min="0" disabled={bloqueadoPorTiempo}
-                        value={misResultados[partido.id]?.visitante ?? ''}
-                        onChange={(e) => handleScoreChange(partido.id, 'visitante', e.target.value)}
-                        placeholder="-"
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
             </div>
             
           </div>
@@ -307,9 +393,10 @@ export default function Porra() {
         {/* ── PORRAS DEL GRUPO ── */}
         {activeTab === 'grupo' && (
           <div className="tab-content">
+            {/* 🚀 NUEVA REGLA ANTITRAMPAS */}
             <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
               <i className="fa-solid fa-eye-slash" style={{ color: 'var(--gold)', fontSize: '1.5rem', display: 'block', margin: '0 auto 10px' }}></i> 
-              <strong>Regla de Visibilidad:</strong> Solo puedes ver el pronóstico de otra persona en los partidos donde <strong>tú ya hayas puesto y guardado un resultado</strong>. Si no has apostado, te saldrán interrogantes (?).
+              <strong>Regla de Apuestas a Ciegas:</strong> Para garantizar el juego limpio y evitar "copiadas", los pronósticos del resto de miembros <strong>solo serán visibles cuando el partido haya comenzado</strong> y las apuestas estén bloqueadas (🔒).
             </div>
 
             <select 
@@ -323,36 +410,172 @@ export default function Porra() {
             {cargandoOtro ? (
               <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Buscando en la base de datos...</p>
             ) : porraOtro ? (
+              <>
+                {/* Acordeón de Archivados de los amigos */}
+                {partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length > 0 && (
+                  <div className="archivados-container">
+                    <button 
+                      className="btn-archivados-toggle" 
+                      onClick={() => setArchivadosOpenGrupo(!archivadosOpenGrupo)}
+                    >
+                      <i className={`fa-solid ${archivadosOpenGrupo ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                      {archivadosOpenGrupo ? `Ocultar Historial de ${miembroSeleccionado}` : `Ver Partidos Finalizados de ${miembroSeleccionado} (${partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length})`}
+                    </button>
+
+                    {archivadosOpenGrupo && (
+                      <div className="partidos-list archivados-content">
+                        {partidosFaseGrupos
+                          .filter(p => comprobarPartidoArchivado(p.timestamp))
+                          .map(partido => {
+                            // En archivados siempre se ve porque ya han empezado
+                            return (
+                              <div key={partido.id} className="partido-card" style={{ opacity: 0.65 }}>
+                                <div className="partido-info">
+                                  <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} • FINALIZADO 🔒</span>
+                                  <div className="equipos-wrap">
+                                    <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                                    <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
+                                    <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                                  </div>
+                                </div>
+                                <div className="marcador-inputs">
+                                  <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '8px', fontWeight: 'bold' }}>
+                                    {porraOtro[partido.id]?.local ?? '-'}
+                                  </div>
+                                  <span>-</span>
+                                  <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '8px', fontWeight: 'bold' }}>
+                                    {porraOtro[partido.id]?.visitante ?? '-'}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Partidos Activos de los amigos */}
+                <div className="partidos-list">
+                  {partidosFaseGrupos
+                    .filter(p => !comprobarPartidoArchivado(p.timestamp))
+                    .map(partido => {
+                      const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
+                      // 🚀 LÓGICA ANTITRAMPAS: Solo se ve si ya empezó el partido
+                      const mostrarMarcador = bloqueadoPorTiempo
+
+                      return (
+                        <div key={partido.id} className="partido-card">
+                          <div className="partido-info">
+                            <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                            <div className="equipos-wrap">
+                              <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                              <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
+                              <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                            </div>
+                          </div>
+                          <div className="marcador-inputs">
+                            <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: `1px solid ${!mostrarMarcador ? 'var(--border)' : 'var(--gold-light)'}`, borderRadius: '8px', fontWeight: 'bold', color: !mostrarMarcador ? 'var(--text-dim)' : 'var(--text)' }}>
+                              {mostrarMarcador ? (porraOtro[partido.id]?.local ?? '-') : '?'}
+                            </div>
+                            <span>-</span>
+                            <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: `1px solid ${!mostrarMarcador ? 'var(--border)' : 'var(--gold-light)'}`, borderRadius: '8px', fontWeight: 'bold', color: !mostrarMarcador ? 'var(--text-dim)' : 'var(--text)' }}>
+                              {mostrarMarcador ? (porraOtro[partido.id]?.visitante ?? '-') : '?'}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
+              </>
+            ) : null}
+          </div>
+        )}
+
+        {/* ── RESUMEN GLOBAL ── */}
+        {activeTab === 'resumen' && (
+          <div className="tab-content">
+            {/* 🚀 NUEVA REGLA ANTITRAMPAS */}
+            <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
+              <i className="fa-solid fa-users-viewfinder" style={{ color: 'var(--gold)', fontSize: '1.5rem', display: 'block', margin: '0 auto 10px' }}></i> 
+              <strong>Resumen Global:</strong> Despliega cada partido para ver qué ha votado cada miembro del grupo. 
+              <br/><br/>
+              <span style={{ opacity: 0.8 }}><i className="fa-solid fa-shield-halved"></i> <strong>Nota de Seguridad:</strong> Los marcadores exactos estarán ocultos con un (?) <strong>hasta que suene el pitido inicial</strong> (🔒). Así evitamos que los rezagados espíen las apuestas de los demás. ¡Juego limpio!</span>
+            </div>
+
+            {loadingGlobal ? (
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Recopilando todas las apuestas de la base de datos...</p>
+            ) : (
               <div className="partidos-list">
                 {partidosFaseGrupos.map(partido => {
-                  const miPron = misResultados[partido.id]
-                  const tengoPronostico = miPron && miPron.local !== '' && miPron.local !== undefined && miPron.visitante !== '' && miPron.visitante !== undefined
+                  const isOpen = expandedMatch === partido.id
+                  const apuestasPartido = pronosticosGlobales[partido.id] || []
                   const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
+                  
+                  // 🚀 LÓGICA ANTITRAMPAS: Solo se ve si ya empezó el partido
+                  const puedeVerApuestas = bloqueadoPorTiempo
 
                   return (
-                    <div key={partido.id} className="partido-card">
-                      <div className="partido-info">
-                        <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
-                        <div className="equipos-wrap">
-                          <span>{partido.banderaLocal} {partido.equipoLocal}</span>
-                          <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
-                          <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                    <div 
+                      key={partido.id} 
+                      className="partido-card" 
+                      style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
+                      onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
+                    >
+                      {/* Cabecera del Acordeón */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="partido-info" style={{ flex: 1 }}>
+                          <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                          <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
+                            <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                            <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
+                            <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
+                            {apuestasPartido.length} apuestas
+                          </span>
+                          <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
                         </div>
                       </div>
-                      <div className="marcador-inputs">
-                        <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: `1px solid ${!tengoPronostico ? 'var(--border)' : 'var(--gold-light)'}`, borderRadius: '8px', fontWeight: 'bold', color: !tengoPronostico ? 'var(--text-dim)' : 'var(--text)' }}>
-                          {tengoPronostico ? (porraOtro[partido.id]?.local ?? '-') : '?'}
+
+                      {/* Desplegable con la cuadrícula de apuestas */}
+                      {isOpen && (
+                        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
+                          {apuestasPartido.length === 0 ? (
+                            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido todavía.</p>
+                          ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                              {apuestasPartido.map((apuesta, idx) => (
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                  
+                                  {/* Info del usuario */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
+                                      <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                    </span>
+                                    <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+                                      {apuesta.nombre}
+                                    </span>
+                                  </div>
+
+                                  {/* Marcador del usuario */}
+                                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: 'var(--bg-primary)', padding: '4px 12px', borderRadius: '6px', border: `1px solid ${puedeVerApuestas ? 'var(--gold-light)' : 'var(--border)'}`, color: puedeVerApuestas ? 'var(--text)' : 'var(--text-dim)', letterSpacing: '2px' }}>
+                                    {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
+                                  </div>
+
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <span>-</span>
-                        <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-surface)', border: `1px solid ${!tengoPronostico ? 'var(--border)' : 'var(--gold-light)'}`, borderRadius: '8px', fontWeight: 'bold', color: !tengoPronostico ? 'var(--text-dim)' : 'var(--text)' }}>
-                          {tengoPronostico ? (porraOtro[partido.id]?.visitante ?? '-') : '?'}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   )
                 })}
               </div>
-            ) : null}
+            )}
           </div>
         )}
 
