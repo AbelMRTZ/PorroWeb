@@ -16,13 +16,22 @@ const comprobarPartidoComenzado = (timestamp) => {
   return Date.now() >= msPartido
 }
 
-// Comprueba si han transcurrido 3 horas o más desde el inicio del partido
+// Comprueba si han transcurrido 3 horas o más (Usado en Mi Porra y Grupo)
 const comprobarPartidoArchivado = (timestamp) => {
   if (!timestamp) return false
   const msPartido = new Date(timestamp).getTime()
   if (isNaN(msPartido)) return false
   const TRES_HORAS_MS = 3 * 60 * 60 * 1000
   return Date.now() >= (msPartido + TRES_HORAS_MS)
+}
+
+// 🚀 NUEVO: Comprueba si han transcurrido 24 horas o más (Usado en Resumen Global)
+const comprobarPartidoArchivado24h = (timestamp) => {
+  if (!timestamp) return false
+  const msPartido = new Date(timestamp).getTime()
+  if (isNaN(msPartido)) return false
+  const VEINTICUATRO_HORAS_MS = 24 * 60 * 60 * 1000
+  return Date.now() >= (msPartido + VEINTICUATRO_HORAS_MS)
 }
 
 export default function Porra() {
@@ -35,6 +44,7 @@ export default function Porra() {
   // Estados de control para los acordeones de partidos archivados
   const [archivadosOpenMiPorra, setArchivadosOpenMiPorra] = useState(false)
   const [archivadosOpenGrupo, setArchivadosOpenGrupo] = useState(false)
+  const [archivadosOpenResumen, setArchivadosOpenResumen] = useState(false) // 🚀 Estado para el Resumen Global
 
   // Estados para la clasificación
   const [clasificacion, setClasificacion] = useState([])
@@ -47,7 +57,7 @@ export default function Porra() {
 
   // Estados para el resumen global
   const [pronosticosGlobales, setPronosticosGlobales] = useState({})
-  const [resultadosReales, setResultadosReales] = useState({}) // 🚀 Guardar resultados reales
+  const [resultadosReales, setResultadosReales] = useState({})
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [expandedMatch, setExpandedMatch] = useState(null) 
   
@@ -102,7 +112,6 @@ export default function Porra() {
     if (activeTab === 'resumen') {
       async function cargarResumenGlobal() {
         setLoadingGlobal(true)
-        // Pedimos a la vez los pronósticos de todos y los resultados oficiales jugados
         const [pronosticosRes, realesRes] = await Promise.all([
           supabase.from('porra_pronosticos').select('*'),
           supabase.from('porra_resultados').select('*').eq('jugado', true)
@@ -521,106 +530,217 @@ export default function Porra() {
             {loadingGlobal ? (
               <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Recopilando todas las apuestas de la base de datos...</p>
             ) : (
-              <div className="partidos-list">
-                {partidosFaseGrupos.map(partido => {
-                  const isOpen = expandedMatch === partido.id
-                  const apuestasPartido = pronosticosGlobales[partido.id] || []
-                  const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
-                  const puedeVerApuestas = bloqueadoPorTiempo
-                  const resReal = resultadosReales[partido.id]
-
-                  return (
-                    <div 
-                      key={partido.id} 
-                      className="partido-card" 
-                      style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
-                      onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
+              <>
+                {/* 🚀 Acordeón de Archivados (> 24h) en Resumen Global */}
+                {partidosFaseGrupos.filter(p => comprobarPartidoArchivado24h(p.timestamp)).length > 0 && (
+                  <div className="archivados-container">
+                    <button 
+                      className="btn-archivados-toggle" 
+                      onClick={() => setArchivadosOpenResumen(!archivadosOpenResumen)}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div className="partido-info" style={{ flex: 1 }}>
-                          <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
-                          <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
-                            <span>{partido.banderaLocal} {partido.equipoLocal}</span>
-                            <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
-                            <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                          {resReal && (
-                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
-                              <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
-                              <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
-                            </div>
-                          )}
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
-                            {apuestasPartido.length} apuestas
-                          </span>
-                          <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
-                        </div>
-                      </div>
+                      <i className={`fa-solid ${archivadosOpenResumen ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                      {archivadosOpenResumen ? 'Ocultar Jornadas Anteriores' : `Ver Partidos de Jornadas Anteriores (${partidosFaseGrupos.filter(p => comprobarPartidoArchivado24h(p.timestamp)).length})`}
+                    </button>
 
-                      {isOpen && (
-                        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
-                          {apuestasPartido.length === 0 ? (
-                            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido todavía.</p>
-                          ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                              {apuestasPartido.map((apuesta, idx) => {
-                                
-                                // 🚀 Lógica de Colores Semáforo 🚀
-                                let colorFondo = 'var(--bg-primary)'
-                                let colorBorde = puedeVerApuestas ? 'var(--gold-light)' : 'var(--border)'
-                                let colorTexto = puedeVerApuestas ? 'var(--text)' : 'var(--text-dim)'
+                    {archivadosOpenResumen && (
+                      <div className="partidos-list archivados-content">
+                        {partidosFaseGrupos
+                          .filter(p => comprobarPartidoArchivado24h(p.timestamp))
+                          .map(partido => {
+                            const isOpen = expandedMatch === partido.id
+                            const apuestasPartido = pronosticosGlobales[partido.id] || []
+                            const resReal = resultadosReales[partido.id]
 
-                                if (puedeVerApuestas && resReal) {
-                                  const pLocal = apuesta.local
-                                  const pVisi = apuesta.visitante
-                                  const rLocal = resReal.local
-                                  const rVisi = resReal.visitante
-
-                                  if (pLocal === rLocal && pVisi === rVisi) {
-                                    // Verde - Pleno
-                                    colorBorde = '#22c55e'
-                                    colorTexto = '#22c55e'
-                                    colorFondo = 'rgba(34, 197, 94, 0.1)'
-                                  } else if (Math.sign(pLocal - pVisi) === Math.sign(rLocal - rVisi)) {
-                                    // Naranja - Acierto
-                                    colorBorde = '#f59e0b'
-                                    colorTexto = '#f59e0b'
-                                    colorFondo = 'rgba(245, 158, 11, 0.1)'
-                                  } else {
-                                    // Rojo - Fallo
-                                    colorBorde = '#ef4444'
-                                    colorTexto = '#ef4444'
-                                    colorFondo = 'rgba(239, 68, 68, 0.1)'
-                                  }
-                                }
-
-                                return (
-                                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                      <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
-                                        <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
-                                      </span>
-                                      <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
-                                        {apuesta.nombre}
-                                      </span>
-                                    </div>
-
-                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
-                                      {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
+                            return (
+                              <div 
+                                key={partido.id} 
+                                className="partido-card" 
+                                style={{ opacity: 0.85, flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
+                                onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div className="partido-info" style={{ flex: 1 }}>
+                                    <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} 🔒</span>
+                                    <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
+                                      <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                                      <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
+                                      <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
                                     </div>
                                   </div>
-                                )
-                              })}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    {resReal && (
+                                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
+                                        <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
+                                      </div>
+                                    )}
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
+                                      {apuestasPartido.length} apuestas
+                                    </span>
+                                    <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
+                                  </div>
+                                </div>
+
+                                {isOpen && (
+                                  <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
+                                    {apuestasPartido.length === 0 ? (
+                                      <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido.</p>
+                                    ) : (
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                                        {apuestasPartido.map((apuesta, idx) => {
+                                          let colorFondo = 'var(--bg-primary)'
+                                          let colorBorde = 'var(--gold-light)'
+                                          let colorTexto = 'var(--text)'
+
+                                          if (resReal) {
+                                            const pLocal = apuesta.local
+                                            const pVisi = apuesta.visitante
+                                            const rLocal = resReal.local
+                                            const rVisi = resReal.visitante
+
+                                            if (pLocal === rLocal && pVisi === rVisi) {
+                                              colorBorde = '#22c55e'
+                                              colorTexto = '#22c55e'
+                                              colorFondo = 'rgba(34, 197, 94, 0.1)'
+                                            } else if (Math.sign(pLocal - pVisi) === Math.sign(rLocal - rVisi)) {
+                                              colorBorde = '#f59e0b'
+                                              colorTexto = '#f59e0b'
+                                              colorFondo = 'rgba(245, 158, 11, 0.1)'
+                                            } else {
+                                              colorBorde = '#ef4444'
+                                              colorTexto = '#ef4444'
+                                              colorFondo = 'rgba(239, 68, 68, 0.1)'
+                                            }
+                                          }
+
+                                          return (
+                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
+                                                  <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                                </span>
+                                                <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+                                                  {apuesta.nombre}
+                                                </span>
+                                              </div>
+                                              <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
+                                                {`${apuesta.local}-${apuesta.visitante}`}
+                                              </div>
+                                            </div>
+                                          )
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 🚀 Partidos Activos y Partidos Recientes (< 24h) en Resumen Global */}
+                <div className="partidos-list">
+                  {partidosFaseGrupos
+                    .filter(p => !comprobarPartidoArchivado24h(p.timestamp))
+                    .map(partido => {
+                      const isOpen = expandedMatch === partido.id
+                      const apuestasPartido = pronosticosGlobales[partido.id] || []
+                      const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
+                      const puedeVerApuestas = bloqueadoPorTiempo
+                      const resReal = resultadosReales[partido.id]
+
+                      return (
+                        <div 
+                          key={partido.id} 
+                          className="partido-card" 
+                          style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
+                          onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div className="partido-info" style={{ flex: 1 }}>
+                              <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                              <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
+                                <span>{partido.banderaLocal} {partido.equipoLocal}</span>
+                                <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
+                                <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                              {resReal && (
+                                <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
+                                  <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
+                                  <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
+                                </div>
+                              )}
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
+                                {apuestasPartido.length} apuestas
+                              </span>
+                              <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
+                            </div>
+                          </div>
+
+                          {isOpen && (
+                            <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
+                              {apuestasPartido.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido todavía.</p>
+                              ) : (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                                  {apuestasPartido.map((apuesta, idx) => {
+                                    
+                                    let colorFondo = 'var(--bg-primary)'
+                                    let colorBorde = puedeVerApuestas ? 'var(--gold-light)' : 'var(--border)'
+                                    let colorTexto = puedeVerApuestas ? 'var(--text)' : 'var(--text-dim)'
+
+                                    if (puedeVerApuestas && resReal) {
+                                      const pLocal = apuesta.local
+                                      const pVisi = apuesta.visitante
+                                      const rLocal = resReal.local
+                                      const rVisi = resReal.visitante
+
+                                      if (pLocal === rLocal && pVisi === rVisi) {
+                                        colorBorde = '#22c55e'
+                                        colorTexto = '#22c55e'
+                                        colorFondo = 'rgba(34, 197, 94, 0.1)'
+                                      } else if (Math.sign(pLocal - pVisi) === Math.sign(rLocal - rVisi)) {
+                                        colorBorde = '#f59e0b'
+                                        colorTexto = '#f59e0b'
+                                        colorFondo = 'rgba(245, 158, 11, 0.1)'
+                                      } else {
+                                        colorBorde = '#ef4444'
+                                        colorTexto = '#ef4444'
+                                        colorFondo = 'rgba(239, 68, 68, 0.1)'
+                                      }
+                                    }
+
+                                    return (
+                                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                          <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
+                                            <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                          </span>
+                                          <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+                                            {apuesta.nombre}
+                                          </span>
+                                        </div>
+
+                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
+                                          {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                      )
+                    })}
+                </div>
+              </>
             )}
           </div>
         )}
