@@ -47,6 +47,7 @@ export default function Porra() {
 
   // Estados para el resumen global
   const [pronosticosGlobales, setPronosticosGlobales] = useState({})
+  const [resultadosReales, setResultadosReales] = useState({}) // 🚀 Guardar resultados reales
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [expandedMatch, setExpandedMatch] = useState(null) 
   
@@ -96,15 +97,28 @@ export default function Porra() {
     }
   }, [activeTab, miembroSeleccionado])
 
-  // ── 4. CARGAR RESUMEN GLOBAL ──
+  // ── 4. CARGAR RESUMEN GLOBAL Y RESULTADOS REALES ──
   useEffect(() => {
     if (activeTab === 'resumen') {
       async function cargarResumenGlobal() {
         setLoadingGlobal(true)
-        const { data: pronosticos } = await supabase.from('porra_pronosticos').select('*')
-        if (pronosticos) {
+        // Pedimos a la vez los pronósticos de todos y los resultados oficiales jugados
+        const [pronosticosRes, realesRes] = await Promise.all([
+          supabase.from('porra_pronosticos').select('*'),
+          supabase.from('porra_resultados').select('*').eq('jugado', true)
+        ])
+        
+        if (realesRes.data) {
+          const resGuardados = {}
+          realesRes.data.forEach(r => {
+            resGuardados[r.partido_id] = { local: r.goles_local, visitante: r.goles_visitante }
+          })
+          setResultadosReales(resGuardados)
+        }
+
+        if (pronosticosRes.data) {
           const agrupados = {}
-          pronosticos.forEach(p => {
+          pronosticosRes.data.forEach(p => {
             if (!agrupados[p.partido_id]) agrupados[p.partido_id] = []
             const userObj = USERS.find(u => u.id === p.user_id)
             if (userObj) {
@@ -393,7 +407,6 @@ export default function Porra() {
         {/* ── PORRAS DEL GRUPO ── */}
         {activeTab === 'grupo' && (
           <div className="tab-content">
-            {/* 🚀 NUEVA REGLA ANTITRAMPAS */}
             <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
               <i className="fa-solid fa-eye-slash" style={{ color: 'var(--gold)', fontSize: '1.5rem', display: 'block', margin: '0 auto 10px' }}></i> 
               <strong>Regla de Apuestas a Ciegas:</strong> Para garantizar el juego limpio y evitar "copiadas", los pronósticos del resto de miembros <strong>solo serán visibles cuando el partido haya comenzado</strong> y las apuestas estén bloqueadas (🔒).
@@ -427,7 +440,6 @@ export default function Porra() {
                         {partidosFaseGrupos
                           .filter(p => comprobarPartidoArchivado(p.timestamp))
                           .map(partido => {
-                            // En archivados siempre se ve porque ya han empezado
                             return (
                               <div key={partido.id} className="partido-card" style={{ opacity: 0.65 }}>
                                 <div className="partido-info">
@@ -461,7 +473,6 @@ export default function Porra() {
                     .filter(p => !comprobarPartidoArchivado(p.timestamp))
                     .map(partido => {
                       const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
-                      // 🚀 LÓGICA ANTITRAMPAS: Solo se ve si ya empezó el partido
                       const mostrarMarcador = bloqueadoPorTiempo
 
                       return (
@@ -495,12 +506,16 @@ export default function Porra() {
         {/* ── RESUMEN GLOBAL ── */}
         {activeTab === 'resumen' && (
           <div className="tab-content">
-            {/* 🚀 NUEVA REGLA ANTITRAMPAS */}
             <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
               <i className="fa-solid fa-users-viewfinder" style={{ color: 'var(--gold)', fontSize: '1.5rem', display: 'block', margin: '0 auto 10px' }}></i> 
               <strong>Resumen Global:</strong> Despliega cada partido para ver qué ha votado cada miembro del grupo. 
               <br/><br/>
-              <span style={{ opacity: 0.8 }}><i className="fa-solid fa-shield-halved"></i> <strong>Nota de Seguridad:</strong> Los marcadores exactos estarán ocultos con un (?) <strong>hasta que suene el pitido inicial</strong> (🔒). Así evitamos que los rezagados espíen las apuestas de los demás. ¡Juego limpio!</span>
+              <span style={{ opacity: 0.8 }}><i className="fa-solid fa-shield-halved"></i> <strong>Nota de Seguridad:</strong> Los marcadores exactos estarán ocultos con un (?) <strong>hasta que suene el pitido inicial</strong> (🔒).<br/></span>
+              <span style={{ display: 'inline-block', marginTop: '10px', padding: '6px 12px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                <span style={{ color: '#22c55e', fontWeight: 'bold' }}>🟩 Pleno (3pts)</span> &nbsp;|&nbsp; 
+                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>🟧 Acierto (1pt)</span> &nbsp;|&nbsp; 
+                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>🟥 Fallo (0pts)</span>
+              </span>
             </div>
 
             {loadingGlobal ? (
@@ -511,9 +526,8 @@ export default function Porra() {
                   const isOpen = expandedMatch === partido.id
                   const apuestasPartido = pronosticosGlobales[partido.id] || []
                   const bloqueadoPorTiempo = comprobarPartidoComenzado(partido.timestamp)
-                  
-                  // 🚀 LÓGICA ANTITRAMPAS: Solo se ve si ya empezó el partido
                   const puedeVerApuestas = bloqueadoPorTiempo
+                  const resReal = resultadosReales[partido.id]
 
                   return (
                     <div 
@@ -522,7 +536,6 @@ export default function Porra() {
                       style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
                       onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
                     >
-                      {/* Cabecera del Acordeón */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div className="partido-info" style={{ flex: 1 }}>
                           <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
@@ -533,6 +546,12 @@ export default function Porra() {
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                          {resReal && (
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
+                              <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
+                            </div>
+                          )}
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
                             {apuestasPartido.length} apuestas
                           </span>
@@ -540,33 +559,60 @@ export default function Porra() {
                         </div>
                       </div>
 
-                      {/* Desplegable con la cuadrícula de apuestas */}
                       {isOpen && (
                         <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
                           {apuestasPartido.length === 0 ? (
                             <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido todavía.</p>
                           ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                              {apuestasPartido.map((apuesta, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                  
-                                  {/* Info del usuario */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
-                                      <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
-                                    </span>
-                                    <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
-                                      {apuesta.nombre}
-                                    </span>
-                                  </div>
+                              {apuestasPartido.map((apuesta, idx) => {
+                                
+                                // 🚀 Lógica de Colores Semáforo 🚀
+                                let colorFondo = 'var(--bg-primary)'
+                                let colorBorde = puedeVerApuestas ? 'var(--gold-light)' : 'var(--border)'
+                                let colorTexto = puedeVerApuestas ? 'var(--text)' : 'var(--text-dim)'
 
-                                  {/* Marcador del usuario */}
-                                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: 'var(--bg-primary)', padding: '4px 12px', borderRadius: '6px', border: `1px solid ${puedeVerApuestas ? 'var(--gold-light)' : 'var(--border)'}`, color: puedeVerApuestas ? 'var(--text)' : 'var(--text-dim)', letterSpacing: '2px' }}>
-                                    {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
-                                  </div>
+                                if (puedeVerApuestas && resReal) {
+                                  const pLocal = apuesta.local
+                                  const pVisi = apuesta.visitante
+                                  const rLocal = resReal.local
+                                  const rVisi = resReal.visitante
 
-                                </div>
-                              ))}
+                                  if (pLocal === rLocal && pVisi === rVisi) {
+                                    // Verde - Pleno
+                                    colorBorde = '#22c55e'
+                                    colorTexto = '#22c55e'
+                                    colorFondo = 'rgba(34, 197, 94, 0.1)'
+                                  } else if (Math.sign(pLocal - pVisi) === Math.sign(rLocal - rVisi)) {
+                                    // Naranja - Acierto
+                                    colorBorde = '#f59e0b'
+                                    colorTexto = '#f59e0b'
+                                    colorFondo = 'rgba(245, 158, 11, 0.1)'
+                                  } else {
+                                    // Rojo - Fallo
+                                    colorBorde = '#ef4444'
+                                    colorTexto = '#ef4444'
+                                    colorFondo = 'rgba(239, 68, 68, 0.1)'
+                                  }
+                                }
+
+                                return (
+                                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
+                                        <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                      </span>
+                                      <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+                                        {apuesta.nombre}
+                                      </span>
+                                    </div>
+
+                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
+                                      {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
+                                    </div>
+                                  </div>
+                                )
+                              })}
                             </div>
                           )}
                         </div>
