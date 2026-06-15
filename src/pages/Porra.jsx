@@ -25,7 +25,7 @@ const comprobarPartidoArchivado = (timestamp) => {
   return Date.now() >= (msPartido + TRES_HORAS_MS)
 }
 
-// 🚀 NUEVO: Comprueba si han transcurrido 24 horas o más (Usado en Resumen Global)
+// Comprueba si han transcurrido 24 horas o más (Usado en Resumen Global)
 const comprobarPartidoArchivado24h = (timestamp) => {
   if (!timestamp) return false
   const msPartido = new Date(timestamp).getTime()
@@ -44,7 +44,7 @@ export default function Porra() {
   // Estados de control para los acordeones de partidos archivados
   const [archivadosOpenMiPorra, setArchivadosOpenMiPorra] = useState(false)
   const [archivadosOpenGrupo, setArchivadosOpenGrupo] = useState(false)
-  const [archivadosOpenResumen, setArchivadosOpenResumen] = useState(false) // 🚀 Estado para el Resumen Global
+  const [archivadosOpenResumen, setArchivadosOpenResumen] = useState(false) 
 
   // Estados para la clasificación
   const [clasificacion, setClasificacion] = useState([])
@@ -512,26 +512,24 @@ export default function Porra() {
           </div>
         )}
 
-        {/* ── RESUMEN GLOBAL ── */}
+        {/* ── 🚀 RESUMEN GLOBAL 🚀 ── */}
         {activeTab === 'resumen' && (
           <div className="tab-content">
             <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
               <i className="fa-solid fa-users-viewfinder" style={{ color: 'var(--gold)', fontSize: '1.5rem', display: 'block', margin: '0 auto 10px' }}></i> 
               <strong>Resumen Global:</strong> Despliega cada partido para ver qué ha votado cada miembro del grupo. 
-              <br/><br/>
-              <span style={{ opacity: 0.8 }}><i className="fa-solid fa-shield-halved"></i> <strong>Nota de Seguridad:</strong> Los marcadores exactos estarán ocultos con un (?) <strong>hasta que suene el pitido inicial</strong> (🔒).<br/></span>
-              <span style={{ display: 'inline-block', marginTop: '10px', padding: '6px 12px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                <span style={{ color: '#22c55e', fontWeight: 'bold' }}>🟩 Pleno (3pts)</span> &nbsp;|&nbsp; 
-                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>🟧 Acierto (1pt)</span> &nbsp;|&nbsp; 
+              <div className="leyenda-colores">
+                <span style={{ color: '#22c55e', fontWeight: 'bold' }}>🟩 Pleno (3pts)</span> 
+                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>🟧 Acierto (1pt)</span> 
                 <span style={{ color: '#ef4444', fontWeight: 'bold' }}>🟥 Fallo (0pts)</span>
-              </span>
+              </div>
             </div>
 
             {loadingGlobal ? (
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Recopilando todas las apuestas de la base de datos...</p>
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Recopilando apuestas de la base de datos...</p>
             ) : (
               <>
-                {/* 🚀 Acordeón de Archivados (> 24h) en Resumen Global */}
+                {/* Acordeón de Archivados (> 24h) en Resumen Global */}
                 {partidosFaseGrupos.filter(p => comprobarPartidoArchivado24h(p.timestamp)).length > 0 && (
                   <div className="archivados-container">
                     <button 
@@ -558,23 +556,23 @@ export default function Porra() {
                                 style={{ opacity: 0.85, flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
                                 onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
                               >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <div className="partido-info" style={{ flex: 1 }}>
-                                    <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} 🔒</span>
-                                    <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
+                                <div className="resumen-header">
+                                  <div className="partido-info">
+                                    <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} 🔒</span>
+                                    <div className="equipos-wrap">
                                       <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                                       <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
                                       <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
                                     </div>
                                   </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                  <div className="resumen-badges">
                                     {resReal && (
-                                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
+                                      <div className="resumen-real-badge">
                                         <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
                                         <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
                                       </div>
                                     )}
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
+                                    <span className="resumen-apuestas-badge">
                                       {apuestasPartido.length} apuestas
                                     </span>
                                     <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
@@ -584,9 +582,9 @@ export default function Porra() {
                                 {isOpen && (
                                   <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', cursor: 'default' }} onClick={e => e.stopPropagation()}>
                                     {apuestasPartido.length === 0 ? (
-                                      <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido.</p>
+                                      <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga apostó en este partido.</p>
                                     ) : (
-                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                                      <div className="resumen-grid">
                                         {apuestasPartido.map((apuesta, idx) => {
                                           let colorFondo = 'var(--bg-primary)'
                                           let colorBorde = 'var(--gold-light)'
@@ -614,7 +612,7 @@ export default function Porra() {
                                           }
 
                                           return (
-                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div key={idx} className="resumen-apuesta-item">
                                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                 <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
                                                   <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
@@ -623,7 +621,7 @@ export default function Porra() {
                                                   {apuesta.nombre}
                                                 </span>
                                               </div>
-                                              <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
+                                              <div className="resumen-marcador" style={{ background: colorFondo, borderColor: colorBorde, color: colorTexto }}>
                                                 {`${apuesta.local}-${apuesta.visitante}`}
                                               </div>
                                             </div>
@@ -641,7 +639,7 @@ export default function Porra() {
                   </div>
                 )}
 
-                {/* 🚀 Partidos Activos y Partidos Recientes (< 24h) en Resumen Global */}
+                {/* Partidos Activos y Partidos Recientes (< 24h) en Resumen Global */}
                 <div className="partidos-list">
                   {partidosFaseGrupos
                     .filter(p => !comprobarPartidoArchivado24h(p.timestamp))
@@ -659,23 +657,23 @@ export default function Porra() {
                           style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer', transition: 'all 0.2s ease', padding: isOpen ? '20px' : '15px 20px', borderLeft: isOpen ? '4px solid var(--gold)' : '1px solid var(--border)' }} 
                           onClick={() => setExpandedMatch(isOpen ? null : partido.id)}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div className="partido-info" style={{ flex: 1 }}>
-                              <span className="partido-fecha" style={{ marginBottom: '4px' }}>Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
-                              <div className="equipos-wrap" style={{ fontSize: '1.1rem' }}>
+                          <div className="resumen-header">
+                            <div className="partido-info">
+                              <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                              <div className="equipos-wrap">
                                 <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                                 <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
                                 <span>{partido.banderaVisitante} {partido.equipoVisitante}</span>
                               </div>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div className="resumen-badges">
                               {resReal && (
-                                <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-surface2)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--gold-light)' }}>
+                                <div className="resumen-real-badge">
                                   <span style={{ fontSize: '0.85rem', color: 'var(--gold-light)', marginRight: '8px' }}>REAL</span>
                                   <span style={{ fontWeight: 'bold', letterSpacing: '2px' }}>{resReal.local}-{resReal.visitante}</span>
                                 </div>
                               )}
-                              <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'var(--bg-surface2)', padding: '4px 10px', borderRadius: '20px' }}>
+                              <span className="resumen-apuestas-badge">
                                 {apuestasPartido.length} apuestas
                               </span>
                               <i className={`fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} style={{ color: 'var(--gold)', fontSize: '1rem', transition: 'transform 0.2s ease' }}></i>
@@ -687,7 +685,7 @@ export default function Porra() {
                               {apuestasPartido.length === 0 ? (
                                 <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: '10px 0', fontStyle: 'italic', fontSize: '0.9rem' }}>Nadie de la liga ha apostado en este partido todavía.</p>
                               ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                                <div className="resumen-grid">
                                   {apuestasPartido.map((apuesta, idx) => {
                                     
                                     let colorFondo = 'var(--bg-primary)'
@@ -716,7 +714,7 @@ export default function Porra() {
                                     }
 
                                     return (
-                                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                      <div key={idx} className="resumen-apuesta-item">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                           <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
                                             <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
@@ -726,7 +724,7 @@ export default function Porra() {
                                           </span>
                                         </div>
 
-                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', background: colorFondo, padding: '4px 12px', borderRadius: '6px', border: `1px solid ${colorBorde}`, color: colorTexto, letterSpacing: '2px' }}>
+                                        <div className="resumen-marcador" style={{ background: colorFondo, borderColor: colorBorde, color: colorTexto }}>
                                           {puedeVerApuestas ? `${apuesta.local}-${apuesta.visitante}` : '?-?'}
                                         </div>
                                       </div>
