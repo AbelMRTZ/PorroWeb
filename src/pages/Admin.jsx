@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { loadTrips, createTrip, updateTrip, deleteTrip, slugify } from '../data/tripsStore'
 import { uploadPhoto, compressToBlob } from '../data/galleryStore'
 import { loadEvents, createEvent, updateEventsOrder, deleteEvent } from '../data/eventsStore'
+import { loadAllGuests, setGuestPermission } from '../data/guestPermissionsStore'
 import './Admin.css'
 
 // Formateo visual seguro para la lista
@@ -38,6 +39,10 @@ export default function Admin() {
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
 
+  const [guests, setGuests] = useState([])
+  const [guestsLoading, setGuestsLoading] = useState(true)
+  const [togglingGuest, setTogglingGuest] = useState(null)
+
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(true)
   const [eventForm, setEventForm] = useState({ nombre: '', fecha: '', dim: false })
@@ -54,10 +59,29 @@ export default function Admin() {
   }, [])
 
   useEffect(() => {
+    loadAllGuests()
+      .then(setGuests)
+      .finally(() => setGuestsLoading(false))
+  }, [])
+
+  useEffect(() => {
     loadEvents()
       .then(setEvents)
       .finally(() => setEventsLoading(false))
   }, [])
+
+  async function handleToggleGuestPerm(guest, field) {
+    if (togglingGuest === guest.guest_id) return
+    const newVal = !guest[field]
+    setTogglingGuest(guest.guest_id)
+    try {
+      await setGuestPermission(guest.guest_id, field, newVal)
+      setGuests(prev => prev.map(g =>
+        g.guest_id === guest.guest_id ? { ...g, [field]: newVal } : g
+      ))
+    } catch { /* silently ignore */ }
+    setTogglingGuest(null)
+  }
 
   async function handlePhotoSelect(e) {
     const files = Array.from(e.target.files)
@@ -231,6 +255,67 @@ export default function Admin() {
         </h1>
         <p className="admin-subtitle muted">Gestión del contenido para administradores</p>
       </div>
+
+      {/* ── Acceso invitados ── */}
+      <section className="admin-section">
+        <h2 className="admin-section-title">
+          <i className="fa-solid fa-user-secret" aria-hidden="true" /> Acceso de Invitados
+          <span className="admin-count">{guests.length}</span>
+        </h2>
+
+        {guestsLoading ? (
+          <p className="admin-empty-text muted">
+            <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Cargando…
+          </p>
+        ) : guests.length === 0 ? (
+          <p className="admin-empty-text muted">No hay invitados registrados todavía.</p>
+        ) : (
+          <div className="admin-guests-table">
+            <div className="admin-guests-header">
+              <span>Invitado</span>
+              <span>Registrado</span>
+              <span>Porrolimpiadas</span>
+              <span>Fantasy</span>
+            </div>
+            {guests.map(g => {
+              const isToggling = togglingGuest === g.guest_id
+              const date = g.created_at
+                ? new Date(g.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+                : '—'
+              return (
+                <div key={g.guest_id} className="admin-guest-row">
+                  <div className="guest-name-col">
+                    <div className="guest-avatar">
+                      {g.guest_name?.slice(0, 2).toUpperCase() ?? '?'}
+                    </div>
+                    <span className="guest-name">{g.guest_name}</span>
+                  </div>
+                  <span className="guest-date muted">{date}</span>
+                  {['porrolimpiadas', 'fantasy'].map(field => {
+                    const active = !!g[field]
+                    return (
+                      <div key={field}>
+                        <button
+                          className={`guest-perm-toggle ${active ? 'perm-on' : 'perm-off'}`}
+                          onClick={() => handleToggleGuestPerm(g, field)}
+                          disabled={isToggling}
+                          title={active ? 'Revocar acceso' : 'Conceder acceso'}
+                        >
+                          {isToggling
+                            ? <i className="fa-solid fa-spinner fa-spin" />
+                            : active
+                              ? <><i className="fa-solid fa-check" /> Sí</>
+                              : <><i className="fa-solid fa-xmark" /> No</>}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
 
       <section className="admin-section">
         <h2 className="admin-section-title">

@@ -6,7 +6,7 @@ import { USERS } from '../data/usersConfig'
 import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
-const STEP = { SELECT: 'select', NEW: 'new', ENTER: 'enter' }
+const STEP = { SELECT: 'select', NEW: 'new', ENTER: 'enter', GUEST: 'guest' }
 
 // Base de datos local de códigos de activación secretos
 const CODIGOS_ACTIVACION = {
@@ -35,19 +35,21 @@ function initials(nombre) {
 }
 
 export default function Login() {
-  const { hasPassword, setupPassword, login } = useAuth()
+  const { hasPassword, setupPassword, login, loginOrRegisterGuest } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
   const [step, setStep]               = useState(STEP.SELECT)
   const [selectedUser, setSelectedUser] = useState(null)
-  const [activationCode, setActivationCode] = useState('') // 🚀 NUEVO
+  const [activationCode, setActivationCode] = useState('')
   const [password, setPassword]       = useState('')
   const [confirm, setConfirm]         = useState('')
   const [showPwd, setShowPwd]         = useState(false)
   const [error, setError]             = useState('')
   const [loading, setLoading]         = useState(false)
+  const [guestName, setGuestName]     = useState('')
+  const [isNewGuest, setIsNewGuest]   = useState(true)
 
   async function pickUser(u) {
     setSelectedUser(u)
@@ -62,6 +64,19 @@ export default function Login() {
     setStep(STEP.SELECT)
     setSelectedUser(null)
     setPassword(''); setConfirm(''); setActivationCode(''); setError('')
+    setGuestName(''); setIsNewGuest(true)
+  }
+
+  async function handleGuest(e) {
+    e.preventDefault()
+    if (!guestName.trim()) { setError('Escribe un nombre de invitado.'); return }
+    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
+    if (isNewGuest && password !== confirm) { setError('Las contraseñas no coinciden.'); return }
+    setLoading(true)
+    const result = await loginOrRegisterGuest(guestName, password, isNewGuest)
+    setLoading(false)
+    if (!result.ok) { setError(result.error); return }
+    navigate(from, { replace: true })
   }
 
   async function handleNew(e) {
@@ -138,6 +153,17 @@ export default function Login() {
                 </button>
               ))}
             </div>
+
+            <div className="guest-separator">
+              <span>o</span>
+            </div>
+            <button
+              type="button"
+              className="guest-entry-btn"
+              onClick={() => { setStep(STEP.GUEST); setError('') }}
+            >
+              <i className="fa-solid fa-user-secret" aria-hidden="true" /> Entrar como invitado
+            </button>
           </div>
         )}
 
@@ -214,6 +240,89 @@ export default function Login() {
 
             <button className="back-btn" type="button" onClick={back}>
               <i className="fa-solid fa-chevron-left" aria-hidden="true" /> Cambiar usuario
+            </button>
+          </div>
+        )}
+
+        {/* ── STEP GUEST ── */}
+        {step === STEP.GUEST && (
+          <div className="login-section">
+            <div className="guest-badge">
+              <i className="fa-solid fa-user-secret" aria-hidden="true" />
+              <span>Acceso de invitado</span>
+            </div>
+            <p className="login-subtitle">
+              Elige un nombre y una contraseña.<br />
+              Tendrás acceso limitado a la web.
+            </p>
+
+            <form className="login-form" onSubmit={handleGuest} noValidate>
+              <div className="field">
+                <label className="field-label" htmlFor="guest-name">
+                  <i className="fa-solid fa-user" aria-hidden="true" /> Nombre de invitado
+                </label>
+                <input
+                  id="guest-name"
+                  className="field-input"
+                  type="text"
+                  value={guestName}
+                  onChange={e => { setGuestName(e.target.value); setError('') }}
+                  placeholder="Escribe tu nombre"
+                  maxLength={30}
+                  autoFocus
+                />
+              </div>
+
+              <label className="guest-new-toggle">
+                <input
+                  type="checkbox"
+                  checked={isNewGuest}
+                  onChange={e => { setIsNewGuest(e.target.checked); setError('') }}
+                />
+                <span>Primera vez (crear cuenta)</span>
+              </label>
+
+              <div className="field">
+                <label className="field-label" htmlFor="guest-pwd">
+                  <i className="fa-solid fa-lock" aria-hidden="true" /> Contraseña
+                </label>
+                <PasswordInput
+                  id="guest-pwd"
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  show={showPwd}
+                  onToggle={() => setShowPwd(v => !v)}
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+
+              {isNewGuest && (
+                <div className="field">
+                  <label className="field-label" htmlFor="guest-confirm">
+                    <i className="fa-solid fa-lock-open" aria-hidden="true" /> Confirmar contraseña
+                  </label>
+                  <PasswordInput
+                    id="guest-confirm"
+                    value={confirm}
+                    onChange={e => { setConfirm(e.target.value); setError('') }}
+                    show={showPwd}
+                    onToggle={() => setShowPwd(v => !v)}
+                    placeholder="Repite la contraseña"
+                  />
+                </div>
+              )}
+
+              {error && <ErrorMsg text={error} />}
+
+              <button type="submit" className="login-submit guest-submit" disabled={loading}>
+                {loading
+                  ? <><i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Entrando…</>
+                  : <><i className="fa-solid fa-user-secret" aria-hidden="true" /> {isNewGuest ? 'Crear cuenta e Entrar' : 'Entrar'}</>}
+              </button>
+            </form>
+
+            <button className="back-btn" type="button" onClick={back}>
+              <i className="fa-solid fa-chevron-left" aria-hidden="true" /> Volver
             </button>
           </div>
         )}

@@ -139,7 +139,7 @@ function TabInicio() {
           <h3>Último Anuncio</h3>
         </div>
         <p className="announce-text">
-          La web acaba de ser creada. ¡Bienvenidos al portal oficial de La Revolución del Porro!
+          Sección AJUSTE DE CUENTAS añadida. Ahora puedes gestionar y ajustar las cuentas y transacciones para pagar en restaurantes.
         </p>
         <span className="announce-date muted">Junio 2025</span>
       </div>
@@ -216,6 +216,13 @@ function TabApartados() {
       titulo: 'Cubatómetro',
       desc: 'Clasificación etílica del grupo. Registra tus cubatas, chupitos y cervezas y compite por el podio de la noche.',
       badge: '¡NUEVO!',
+    },
+    {
+      to: '/ajuste-cuentas',
+      icon: 'receipt',
+      titulo: 'Ajuste de cuentas',
+      desc: 'Gestiona y ajusta las cuentas y transacciones para pagar en restaurantes.',
+      badge: 'Administración',
     },
     {
       to: '/contacto',

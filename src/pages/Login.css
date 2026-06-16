@@ -276,6 +276,91 @@
 
 .back-btn:hover { color: var(--text-muted); }
 
+/* ── Guest entry ── */
+.guest-separator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+}
+
+.guest-separator::before,
+.guest-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.guest-entry-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+
+.guest-entry-btn:hover {
+  border-color: var(--border-light);
+  color: var(--text);
+  background: rgba(107,114,128,0.12);
+}
+
+/* ── Guest badge (step GUEST header) ── */
+.guest-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: rgba(107,114,128,0.12);
+  border: 1px solid rgba(107,114,128,0.35);
+  border-radius: 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+/* ── Guest new toggle ── */
+.guest-new-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.guest-new-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--purple);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Guest submit variant ── */
+.guest-submit {
+  background: rgba(107,114,128,0.15);
+  border-color: #6b7280;
+  color: #d1d5db;
+}
+
+.guest-submit:hover:not(:disabled) {
+  background: #6b7280;
+  color: #fff;
+}
+
 /* ── Responsive ── */
 @media (max-width: 520px) {
   .login-card { padding: 32px 20px 28px; }
