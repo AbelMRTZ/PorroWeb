@@ -12,12 +12,12 @@ const DRINKS = {
 }
 
 const NIVELES = [
-  { min: 0,  max: 0,        emoji: '🌵', label: 'En seco',    color: '#4a5568' },
-  { min: 1,  max: 5,        emoji: '😌', label: 'Arrancando', color: '#10b981' },
-  { min: 6,  max: 15,       emoji: '😄', label: 'Achispado',  color: '#84cc16' },
-  { min: 16, max: 30,       emoji: '😜', label: 'Pedo',       color: '#f59e0b' },
-  { min: 31, max: 50,       emoji: '🥴', label: 'Borracho',   color: '#f97316' },
-  { min: 51, max: Infinity, emoji: '💀', label: 'Destruido',  color: '#ef4444' },
+  { min: 0,  max: 0,        emoji: '🌵', label: 'Seco',    color: '#4a5568' },
+  { min: 1,  max: 50,        emoji: '😌', label: 'Chic@ Fitness', color: '#10b981' },
+  { min: 51,  max: 100,       emoji: '😄', label: 'Sueltecillo',  color: '#84cc16' },
+  { min: 101, max: 200,       emoji: '😜', label: 'Borracho en Potencia',       color: '#f59e0b' },
+  { min: 201, max: 300,       emoji: '🥴', label: 'Alcohólico Perdido',   color: '#f97316' },
+  { min: 301, max: Infinity, emoji: '💀', label: 'Washed',  color: '#ef4444' },
 ]
 
 function getNivel(pts) {
@@ -184,6 +184,15 @@ export default function Cubatometro() {
                       </div>
                       <div className="podio-nombre">{podioUsers[1].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[1].totalPoints).emoji}</div>
+                      <span className="podio-nivel-label" style={{ color: getNivel(podioUsers[1].totalPoints).color }}>
+                        {getNivel(podioUsers[1].totalPoints).label}
+                      </span>
+                      <div className="podio-drinks">
+                        {podioUsers[1].cubata   > 0 && <span className="podio-chip">🥃 {podioUsers[1].cubata}</span>}
+                        {podioUsers[1].chupito  > 0 && <span className="podio-chip">🔥 {podioUsers[1].chupito}</span>}
+                        {podioUsers[1].cerveza  > 0 && <span className="podio-chip">🍺 {podioUsers[1].cerveza}</span>}
+                        {podioUsers[1].refresco > 0 && <span className="podio-chip">🥤 {podioUsers[1].refresco}</span>}
+                      </div>
                     </div>
                     <div className="podio-block podio-block-2">
                       <span className="podio-pos">2º</span>
@@ -201,6 +210,15 @@ export default function Cubatometro() {
                       </div>
                       <div className="podio-nombre">{podioUsers[0].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[0].totalPoints).emoji}</div>
+                      <span className="podio-nivel-label" style={{ color: getNivel(podioUsers[0].totalPoints).color }}>
+                        {getNivel(podioUsers[0].totalPoints).label}
+                      </span>
+                      <div className="podio-drinks">
+                        {podioUsers[0].cubata   > 0 && <span className="podio-chip">🥃 {podioUsers[0].cubata}</span>}
+                        {podioUsers[0].chupito  > 0 && <span className="podio-chip">🔥 {podioUsers[0].chupito}</span>}
+                        {podioUsers[0].cerveza  > 0 && <span className="podio-chip">🍺 {podioUsers[0].cerveza}</span>}
+                        {podioUsers[0].refresco > 0 && <span className="podio-chip">🥤 {podioUsers[0].refresco}</span>}
+                      </div>
                     </div>
                     <div className="podio-block podio-block-1">
                       <span className="podio-pos">1º</span>
@@ -217,6 +235,15 @@ export default function Cubatometro() {
                       </div>
                       <div className="podio-nombre">{podioUsers[2].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[2].totalPoints).emoji}</div>
+                      <span className="podio-nivel-label" style={{ color: getNivel(podioUsers[2].totalPoints).color }}>
+                        {getNivel(podioUsers[2].totalPoints).label}
+                      </span>
+                      <div className="podio-drinks">
+                        {podioUsers[2].cubata   > 0 && <span className="podio-chip">🥃 {podioUsers[2].cubata}</span>}
+                        {podioUsers[2].chupito  > 0 && <span className="podio-chip">🔥 {podioUsers[2].chupito}</span>}
+                        {podioUsers[2].cerveza  > 0 && <span className="podio-chip">🍺 {podioUsers[2].cerveza}</span>}
+                        {podioUsers[2].refresco > 0 && <span className="podio-chip">🥤 {podioUsers[2].refresco}</span>}
+                      </div>
                     </div>
                     <div className="podio-block podio-block-3">
                       <span className="podio-pos">3º</span>

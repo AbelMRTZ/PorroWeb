@@ -154,6 +154,32 @@
 
 .podio-nivel-emoji { font-size: 1.1rem; }
 
+.podio-nivel-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.podio-drinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  max-width: 100px;
+}
+
+.podio-chip {
+  font-size: 0.65rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
 .podio-block {
   display: flex;
   flex-direction: column;
