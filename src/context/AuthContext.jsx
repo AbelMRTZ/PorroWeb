@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import { supabase } from '../lib/supabase'
 import { USERS } from '../data/usersConfig'
 import { upsertGuest, loadMyPermissions } from '../data/guestPermissionsStore'
+import { notifyGuestRegistered } from '../lib/notifyGuest'
 
 const AuthContext = createContext(null)
 
@@ -143,6 +144,7 @@ export function AuthProvider({ children }) {
       }
       if (!data.session) return { ok: false, error: 'No se pudo crear la sesión. Desactiva "Email Confirmations" en Supabase.' }
       await upsertGuest(guestId, nombre.trim()).catch(() => {})
+      notifyGuestRegistered(nombre.trim()).catch(() => {})
       return { ok: true }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
