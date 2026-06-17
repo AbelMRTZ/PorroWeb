@@ -36,3 +36,11 @@ export async function setGuestPermission(guestId, field, value) {
     .eq('guest_id', guestId)
   if (error) throw error
 }
+
+export async function deleteGuestRecord(guestId) {
+  const { error } = await supabase
+    .from('guest_permissions')
+    .delete()
+    .eq('guest_id', guestId)
+  if (error) throw error
+}

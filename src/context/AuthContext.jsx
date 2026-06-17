@@ -17,7 +17,6 @@ async function resolveUser(session) {
   const meta = session.user.user_metadata ?? {}
   const userId = meta.user_id
 
-  // Lógica de Abel: Cargar Invitados
   if (meta.role === 'guest') {
     return {
       id: userId,
@@ -27,11 +26,9 @@ async function resolveUser(session) {
     }
   }
 
-  // Tu lógica: Cargar Miembros base
   const baseUser = USERS.find(u => u.id === userId) ?? null
   
   if (baseUser) {
-    // Tu lógica: Buscar foto de perfil
     const { data } = await supabase
       .from('user_registrations')
       .select('avatar_url')
@@ -55,22 +52,29 @@ function guestEmail(nombre) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [guestPermissions, setGuestPermissions] = useState(null) // De Abel
-  const [avatarsMap, setAvatarsMap] = useState({}) // Tu caja fuerte de avatares
+  const [guestPermissions, setGuestPermissions] = useState(null)
+  const [avatarsMap, setAvatarsMap] = useState({})
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(await resolveUser(session))
+      // 🚀 ARREGLO: Cargar avatares si hay sesión activa
+      if (session) {
+        loadUserAvatars().then(map => setAvatarsMap(map))
+      }
       setAuthLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(await resolveUser(session))
+      // 🚀 ARREGLO: Recargar los avatares cada vez que alguien inicie sesión
+      if (session) {
+        loadUserAvatars().then(map => setAvatarsMap(map))
+      } else {
+        setAvatarsMap({})
+      }
       setAuthLoading(false)
     })
-
-    // Cargar todos los avatares una sola vez al arrancar
-    loadUserAvatars().then(map => setAvatarsMap(map))
 
     return () => subscription.unsubscribe()
   }, [])

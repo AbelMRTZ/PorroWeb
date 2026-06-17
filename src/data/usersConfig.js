@@ -47,28 +47,31 @@ export async function loadUserAvatars() {
 
 export async function uploadAvatar(userId, file) {
   const fileExt = file.name.split('.').pop()
-  // 🚀 El uso de Date.now() asegura que nunca se repita el nombre y burla la caché
   const fileName = `${userId}-${Date.now()}.${fileExt}`
   const filePath = `${fileName}`
 
+  // 1. Subir al bucket
   const { error: uploadError } = await supabase.storage
     .from('avatars')
     .upload(filePath, file, { upsert: true })
 
   if (uploadError) throw uploadError
 
+  // 2. Obtener URL pública
   const { data: publicUrlData } = supabase.storage
     .from('avatars')
     .getPublicUrl(filePath)
 
   const avatarUrl = publicUrlData.publicUrl
 
-  const { error: updateError } = await supabase
+  // 3. 🚀 ARREGLO DEFINITIVO: Forzar el guardado usando UPSERT y avisar si falla por permisos
+  const { error } = await supabase
     .from('user_registrations')
-    .update({ avatar_url: avatarUrl })
-    .eq('user_id', userId)
+    .upsert({ user_id: userId, avatar_url: avatarUrl }, { onConflict: 'user_id' })
 
-  if (updateError) throw updateError
+  if (error) {
+    throw new Error(`Permiso denegado en la tabla user_registrations. Dile a Abel que configure las políticas RLS. (Detalle: ${error.message})`)
+  }
 
   return avatarUrl
 }

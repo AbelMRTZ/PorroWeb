@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { loadTrips, createTrip, updateTrip, deleteTrip, slugify } from '../data/tripsStore'
 import { uploadPhoto, compressToBlob } from '../data/galleryStore'
 import { loadEvents, createEvent, updateEventsOrder, deleteEvent } from '../data/eventsStore'
-import { loadAllGuests, setGuestPermission } from '../data/guestPermissionsStore'
+// 🚀 Importamos la nueva función deleteGuestRecord
+import { loadAllGuests, setGuestPermission, deleteGuestRecord } from '../data/guestPermissionsStore'
 import './Admin.css'
 
 // Formateo visual seguro para la lista
@@ -83,6 +84,17 @@ export default function Admin() {
     setTogglingGuest(null)
   }
 
+  // 🚀 NUEVA FUNCIÓN PARA BORRAR INVITADOS
+  async function handleDeleteGuest(guest) {
+    if (!confirm(`¿Seguro que quieres eliminar al invitado "${guest.guest_name}"? Perderá sus permisos y no podrá acceder a las secciones bloqueadas.`)) return
+    try {
+      await deleteGuestRecord(guest.guest_id)
+      setGuests(prev => prev.filter(g => g.guest_id !== guest.guest_id))
+    } catch (err) {
+      alert(`Error al eliminar invitado: ${err.message}`)
+    }
+  }
+
   async function handlePhotoSelect(e) {
     const files = Array.from(e.target.files)
     if (!files.length) return
@@ -146,11 +158,9 @@ export default function Admin() {
     setSaving(false)
   }
 
-  // 🚀 FUNCIÓN BLINDADA PARA ABRIR LA EDICIÓN SIN ERRORES
   function startEdit(trip) {
     let safeDate = '';
     if (trip.fecha) {
-      // Forzamos a que extraiga siempre YYYY-MM-DD
       const f = String(trip.fecha);
       safeDate = f.includes('T') ? f.split('T')[0] : f.slice(0, 10);
     }
@@ -276,6 +286,7 @@ export default function Admin() {
               <span>Registrado</span>
               <span>Porrolimpiadas</span>
               <span>Fantasy</span>
+              <span style={{ textAlign: 'center' }}>Eliminar</span>
             </div>
             {guests.map(g => {
               const isToggling = togglingGuest === g.guest_id
@@ -310,6 +321,17 @@ export default function Admin() {
                       </div>
                     )
                   })}
+                  {/* 🚀 BOTÓN DE BORRAR INVITADO */}
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <button
+                      className="admin-delete-btn"
+                      onClick={() => handleDeleteGuest(g)}
+                      aria-label={`Eliminar ${g.guest_name}`}
+                      title="Eliminar invitado"
+                    >
+                      <i className="fa-solid fa-trash" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -519,7 +541,6 @@ export default function Admin() {
                       )}
                     </div>
                     <div className="admin-trip-actions">
-                      {/* ⚠️ ¡AQUÍ ES DONDE TIENES QUE HACER CLIC PARA EDITAR! ⚠️ */}
                       <button
                         className="admin-edit-btn"
                         onClick={() => startEdit(trip)}

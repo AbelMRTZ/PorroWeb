@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { partidosFaseGrupos } from '../data/partidosMundial'
 import { USERS } from '../data/usersConfig'
+import { loadAllGuests } from '../data/guestPermissionsStore' // 🚀 IMPORTAMOS LOS INVITADOS DE ABEL
 import './Porra.css'
 
 const comprobarPartidoComenzado = (timestamp) => {
@@ -32,7 +33,7 @@ const comprobarPartidoArchivado24h = (timestamp) => {
 }
 
 export default function Porra() {
-  const { user, avatarsMap } = useAuth() // 🚀 Usamos avatarsMap del contexto
+  const { user, avatarsMap } = useAuth()
   const [activeTab, setActiveTab] = useState('miporra')
   const [misResultados, setMisResultados] = useState({})
   const [resultadosOriginales, setResultadosOriginales] = useState({}) 
@@ -54,7 +55,29 @@ export default function Porra() {
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [expandedMatch, setExpandedMatch] = useState(null) 
   
-  const miembros = USERS.map(u => u.nombre).sort()
+  // 🚀 NUEVO: Estado para juntar a los miembros y a los invitados
+  const [allParticipants, setAllParticipants] = useState([...USERS])
+
+  useEffect(() => {
+    async function initParticipants() {
+      try {
+        const guests = await loadAllGuests()
+        const formattedGuests = guests.map(g => ({
+          id: g.guest_id,
+          nombre: g.guest_name,
+          color: 'linear-gradient(135deg, #374151 0%, #6b7280 45%, #9ca3af 100%)', // Color gris para invitados
+          isGuest: true
+        }))
+        setAllParticipants([...USERS, ...formattedGuests])
+      } catch (e) {
+        console.error("Error cargando invitados", e)
+      }
+    }
+    initParticipants()
+  }, [])
+
+  // 🚀 Usamos todos los participantes para el desplegable (ordenados alfabéticamente)
+  const miembros = allParticipants.map(u => u.nombre).sort()
 
   useEffect(() => {
     if (!user) return
@@ -73,17 +96,20 @@ export default function Porra() {
   }, [user])
 
   useEffect(() => {
-    if (activeTab === 'clasificacion') {
+    if (activeTab === 'clasificacion' && allParticipants.length > 0) {
       cargarRanking()
     }
-  }, [activeTab])
+  }, [activeTab, allParticipants])
 
   useEffect(() => {
-    if (activeTab === 'grupo') {
+    if (activeTab === 'grupo' && allParticipants.length > 0) {
       async function cargarPorraAmigo() {
         setCargandoOtro(true)
-        const userObj = USERS.find(u => u.nombre === miembroSeleccionado)
-        if (!userObj) return
+        const userObj = allParticipants.find(u => u.nombre === miembroSeleccionado)
+        if (!userObj) {
+          setCargandoOtro(false)
+          return
+        }
 
         const { data: pronosticos } = await supabase.from('porra_pronosticos').select('*').eq('user_id', userObj.id)
         if (pronosticos) {
@@ -95,10 +121,10 @@ export default function Porra() {
       }
       cargarPorraAmigo()
     }
-  }, [activeTab, miembroSeleccionado])
+  }, [activeTab, miembroSeleccionado, allParticipants])
 
   useEffect(() => {
-    if (activeTab === 'resumen') {
+    if (activeTab === 'resumen' && allParticipants.length > 0) {
       async function cargarResumenGlobal() {
         setLoadingGlobal(true)
         const [pronosticosRes, realesRes] = await Promise.all([
@@ -118,10 +144,10 @@ export default function Porra() {
           const agrupados = {}
           pronosticosRes.data.forEach(p => {
             if (!agrupados[p.partido_id]) agrupados[p.partido_id] = []
-            const userObj = USERS.find(u => u.id === p.user_id)
+            const userObj = allParticipants.find(u => u.id === p.user_id)
             if (userObj) {
               agrupados[p.partido_id].push({
-                id: userObj.id, // 🚀 Añadimos el ID para buscar su avatar
+                id: userObj.id, 
                 nombre: userObj.nombre,
                 color: userObj.color,
                 local: p.goles_local,
@@ -138,7 +164,7 @@ export default function Porra() {
       }
       cargarResumenGlobal()
     }
-  }, [activeTab])
+  }, [activeTab, allParticipants])
 
   const handleScoreChange = (partidoId, tipo, valor) => {
     setMisResultados(prev => ({
@@ -205,7 +231,13 @@ export default function Porra() {
     const { data: reales } = await supabase.from('porra_resultados').select('*').eq('jugado', true)
     const { data: pronosticos } = await supabase.from('porra_pronosticos').select('*')
 
-    let ranking = USERS.map(u => ({ id: u.id, nombre: u.nombre, color: u.color, puntos: 0, plenos: 0, aciertos: 0 }))
+    // 🚀 Identificamos quién ha hecho al menos una apuesta en toda la base de datos
+    const usuariosActivos = new Set(pronosticos?.map(p => p.user_id) || [])
+
+    // 🚀 MAGIA: Filtramos la lista para que SOLO entren los que han apostado
+    let ranking = allParticipants
+      .filter(u => usuariosActivos.has(u.id))
+      .map(u => ({ id: u.id, nombre: u.nombre, color: u.color, isGuest: u.isGuest, puntos: 0, plenos: 0, aciertos: 0 }))
 
     if (reales && pronosticos) {
       pronosticos.forEach(pron => {
@@ -383,24 +415,33 @@ export default function Porra() {
                           {index + 1}º
                         </td>
                         <td>
-                          <Link to="/perfiles" state={{ userId: userRank.id }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
-                            {/* 🚀 Muestra la foto de avatar si la hay */}
-                            <span 
-                              className="user-avatar metal-avatar" 
-                              style={{ 
-                                background: avatarsMap[userRank.id] ? 'none' : userRank.color,
-                                backgroundImage: avatarsMap[userRank.id] ? `url(${avatarsMap[userRank.id]})` : 'none',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                width: '25px', height: '25px', fontSize: '0.7rem', display: 'inline-flex', marginRight: '10px', verticalAlign: 'middle' 
-                              }}
-                            >
-                              {!avatarsMap[userRank.id] && <span>{userRank.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
-                            </span>
-                            <span style={{ cursor: 'pointer' }} onMouseOver={(e) => e.target.style.color = 'var(--gold)'} onMouseOut={(e) => e.target.style.color = 'inherit'}>
-                              {userRank.nombre}
-                            </span>
-                          </Link>
+                          {/* 🚀 Si es invitado no tiene enlace al perfil, si es oficial sí */}
+                          {userRank.isGuest ? (
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <span className="user-avatar metal-avatar" style={{ background: userRank.color, width: '25px', height: '25px', fontSize: '0.7rem', display: 'inline-flex', marginRight: '10px', verticalAlign: 'middle' }}>
+                                <span>{userRank.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                              </span>
+                              <span>{userRank.nombre} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginLeft: '4px' }}>(Invitado)</span></span>
+                            </div>
+                          ) : (
+                            <Link to="/perfiles" state={{ userId: userRank.id }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+                              <span 
+                                className="user-avatar metal-avatar" 
+                                style={{ 
+                                  background: avatarsMap[userRank.id] ? 'none' : userRank.color,
+                                  backgroundImage: avatarsMap[userRank.id] ? `url(${avatarsMap[userRank.id]})` : 'none',
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  width: '25px', height: '25px', fontSize: '0.7rem', display: 'inline-flex', marginRight: '10px', verticalAlign: 'middle' 
+                                }}
+                              >
+                                {!avatarsMap[userRank.id] && <span>{userRank.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
+                              </span>
+                              <span style={{ cursor: 'pointer' }} onMouseOver={(e) => e.target.style.color = 'var(--gold)'} onMouseOut={(e) => e.target.style.color = 'inherit'}>
+                                {userRank.nombre}
+                              </span>
+                            </Link>
+                          )}
                         </td>
                         <td style={{ textAlign: 'center', color: 'var(--text-dim)' }}>{userRank.aciertos}</td>
                         <td style={{ textAlign: 'center', color: 'var(--text-dim)' }}>{userRank.plenos}</td>
@@ -612,7 +653,6 @@ export default function Porra() {
                                           return (
                                             <div key={idx} className="resumen-apuesta-item">
                                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                {/* 🚀 Muestra la foto de avatar si la hay */}
                                                 <span 
                                                   className="user-avatar metal-avatar" 
                                                   style={{ 
@@ -723,7 +763,6 @@ export default function Porra() {
                                     return (
                                       <div key={idx} className="resumen-apuesta-item">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                          {/* 🚀 Muestra la foto de avatar si la hay */}
                                           <span 
                                             className="user-avatar metal-avatar" 
                                             style={{ 
