@@ -198,9 +198,13 @@ export default function Porra() {
     }
 
     if (datosAInsertar.length > 0) {
-      await supabase.from('porra_pronosticos').upsert(datosAInsertar)
-      setResultadosOriginales(JSON.parse(JSON.stringify(misResultados)))
-      alert("¡Tus pronósticos válidos han sido guardados en Supabase!")
+      const { error: upsertError } = await supabase.from('porra_pronosticos').upsert(datosAInsertar)
+      if (upsertError) {
+        alert(`❌ Error al guardar: ${upsertError.message}`)
+      } else {
+        setResultadosOriginales(JSON.parse(JSON.stringify(misResultados)))
+        alert("¡Tus pronósticos válidos han sido guardados en Supabase!")
+      }
     } else if (partidosTrampa.length === 0) {
       alert("No has modificado ningún marcador nuevo todavía.")
     }
