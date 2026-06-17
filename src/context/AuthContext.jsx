@@ -1,6 +1,8 @@
+// src/context/AuthContext.jsx
+
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { USERS } from '../data/usersConfig'
+import { USERS, loadUserAvatars } from '../data/usersConfig'
 import { upsertGuest, loadMyPermissions } from '../data/guestPermissionsStore'
 import { notifyGuestRegistered } from '../lib/notifyGuest'
 
@@ -10,18 +12,37 @@ function emailFor(userId) {
   return `${userId}@porro.app`
 }
 
-function resolveUser(session) {
+async function resolveUser(session) {
   if (!session) return null
   const meta = session.user.user_metadata ?? {}
+  const userId = meta.user_id
+
+  // Lógica de Abel: Cargar Invitados
   if (meta.role === 'guest') {
     return {
-      id: meta.user_id,
+      id: userId,
       nombre: meta.nombre,
       role: 'guest',
       color: 'linear-gradient(135deg, #374151 0%, #6b7280 45%, #9ca3af 100%)',
     }
   }
-  return USERS.find(u => u.id === meta.user_id) ?? null
+
+  // Tu lógica: Cargar Miembros base
+  const baseUser = USERS.find(u => u.id === userId) ?? null
+  
+  if (baseUser) {
+    // Tu lógica: Buscar foto de perfil
+    const { data } = await supabase
+      .from('user_registrations')
+      .select('avatar_url')
+      .eq('user_id', userId)
+      .maybeSingle()
+      
+    if (data?.avatar_url) {
+      return { ...baseUser, avatar_url: data.avatar_url }
+    }
+  }
+  return baseUser
 }
 
 function guestEmail(nombre) {
@@ -34,18 +55,22 @@ function guestEmail(nombre) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [guestPermissions, setGuestPermissions] = useState(null)
+  const [guestPermissions, setGuestPermissions] = useState(null) // De Abel
+  const [avatarsMap, setAvatarsMap] = useState({}) // Tu caja fuerte de avatares
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(resolveUser(session))
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setUser(await resolveUser(session))
       setAuthLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(resolveUser(session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+      setUser(await resolveUser(session))
       setAuthLoading(false)
     })
+
+    // Cargar todos los avatares una sola vez al arrancar
+    loadUserAvatars().then(map => setAvatarsMap(map))
 
     return () => subscription.unsubscribe()
   }, [])
@@ -89,7 +114,6 @@ export function AuthProvider({ children }) {
     })
 
     if (signUpErr) {
-      // "User already registered" → try signing in
       if (signUpErr.message?.toLowerCase().includes('already registered') || signUpErr.status === 400) {
         const { error: signInErr } = await supabase.auth.signInWithPassword({
           email: emailFor(userId),
@@ -97,19 +121,15 @@ export function AuthProvider({ children }) {
         })
         if (signInErr) return { ok: false, error: 'Contraseña incorrecta. Inténtalo de nuevo.' }
       } else {
-        // Any other signup error (e.g. password too short) — surface it directly
         return { ok: false, error: signUpErr.message }
       }
     } else if (!data.session) {
-      // signUp succeeded but no session: email confirmations are still ON in Supabase.
-      // Delete the unconfirmed user so the next attempt works cleanly.
       return {
         ok: false,
         error: 'Debes desactivar "Email Confirmations" en Supabase → Authentication → Settings antes de poder usar la app.',
       }
     }
 
-    // Upsert so a missing registration row is always recovered
     await supabase.from('user_registrations').upsert({ user_id: userId })
     return { ok: true }
   }, [])
@@ -128,6 +148,11 @@ export function AuthProvider({ children }) {
     if (error) return { ok: false, error: error.message }
     return { ok: true }
   }, [])
+  
+  const updateLocalAvatar = useCallback((newUrl) => {
+    setUser(prev => prev ? { ...prev, avatar_url: newUrl } : null)
+    setAvatarsMap(prev => ({ ...prev, [user?.id]: newUrl }))
+  }, [user])
 
   const loginOrRegisterGuest = useCallback(async (nombre, password, isNew) => {
     const email = guestEmail(nombre)
@@ -160,10 +185,8 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, isAdmin, isGuest, authLoading,
-      guestPermissions,
-      hasPassword, setupPassword, login, changePassword, logout,
-      loginOrRegisterGuest,
+      user, isAdmin, isGuest, authLoading, avatarsMap, guestPermissions,
+      hasPassword, setupPassword, login, changePassword, logout, updateLocalAvatar, loginOrRegisterGuest
     }}>
       {children}
     </AuthContext.Provider>

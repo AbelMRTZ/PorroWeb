@@ -5,7 +5,6 @@ import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './Navbar.css'
 
-// 🚀 Lista completa de todos los apartados de la web con sus iconos
 const apartadosLinks = [
   { to: '/perfiles', label: 'Buscador de Perfiles', icon: 'id-card' },
   { to: '/porra', label: 'Porra Mundial', icon: 'earth-americas' },
@@ -23,7 +22,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false) // 🚀 Estado para el desplegable
+  const [dropdownOpen, setDropdownOpen] = useState(false) 
   
   const location = useLocation()
   const { user, isAdmin, logout } = useAuth()
@@ -31,7 +30,7 @@ export default function Navbar() {
   useEffect(() => { 
     setMenuOpen(false); 
     setUserMenuOpen(false);
-    setDropdownOpen(false); // Cierra el desplegable al cambiar de página
+    setDropdownOpen(false); 
   }, [location])
 
   useEffect(() => {
@@ -58,14 +57,12 @@ export default function Navbar() {
         </button>
 
         <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          {/* Link individual de Home */}
           <li>
             <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               Home
             </NavLink>
           </li>
 
-          {/* 🚀 MENÚ DESPLEGABLE: Apartados Webs */}
           <li 
             className="nav-dropdown-container"
             onMouseEnter={() => setDropdownOpen(true)}
@@ -92,7 +89,6 @@ export default function Navbar() {
             </div>
           </li>
 
-          {/* Link individual de Admin (Intacto) */}
           {isAdmin && (
             <li>
               <NavLink
@@ -106,15 +102,18 @@ export default function Navbar() {
           )}
         </ul>
 
-        {/* User avatar (Intacto) */}
         <div className="navbar-user">
           <button
             className="user-avatar-btn metal-avatar"
-            style={{ background: user?.color }}
+            style={
+              user?.avatar_url 
+                ? { backgroundImage: `url("${user.avatar_url}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                : { background: user?.color }
+            }
             onClick={() => setUserMenuOpen(v => !v)}
             aria-label="Menú de usuario"
           >
-            <span className="nav-initials">{initials}</span>
+            {!user?.avatar_url && <span className="nav-initials">{initials}</span>}
           </button>
 
           {userMenuOpen && (

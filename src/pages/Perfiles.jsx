@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { USERS } from '../data/usersConfig'
+import { useAuth } from '../context/AuthContext'
 import './Perfiles.css'
 
 const HISTORIAL_MIEMBROS = {
@@ -195,15 +196,13 @@ const HISTORIAL_MIEMBROS = {
 
 export default function Perfiles() {
   const location = useLocation()
+  const { avatarsMap } = useAuth() // 🚀 Extraemos el mapa global de avatares
   const miembrosOrdenados = [...USERS].sort((a, b) => a.nombre.localeCompare(b.nombre))
   
-  // 🚀 Inicializamos con el ID recibido de otra página (si existe)
   const [selectedUserId, setSelectedUserId] = useState(location.state?.userId || miembrosOrdenados[0]?.id)
-  
   const [porraStats, setPorraStats] = useState({})
   const [loadingPorra, setLoadingPorra] = useState(true)
 
-  // 🚀 Si navegamos desde otra página al perfil de alguien, cambiamos al usuario correcto
   useEffect(() => {
     if (location.state?.userId) {
       setSelectedUserId(location.state.userId)
@@ -213,8 +212,9 @@ export default function Perfiles() {
   const perfilActivo = USERS.find(u => u.id === selectedUserId)
 
   useEffect(() => {
-    async function fetchPorra() {
+    async function fetchData() {
       setLoadingPorra(true)
+      
       const { data: reales } = await supabase.from('porra_resultados').select('*').eq('jugado', true)
       const { data: pronosticos } = await supabase.from('porra_pronosticos').select('*')
 
@@ -259,7 +259,7 @@ export default function Perfiles() {
       setLoadingPorra(false)
     }
     
-    fetchPorra()
+    fetchData()
   }, [])
 
   const obtenerIniciales = (nombre) => {
@@ -300,8 +300,16 @@ export default function Perfiles() {
           <div className="profile-dashboard">
             
             <div className="profile-main-header">
-              <div className="profile-big-avatar" style={{ background: perfilActivo.color }}>
-                {obtenerIniciales(perfilActivo.nombre)}
+              {/* 🚀 Renderiza el avatar desde el caché global de authContext */}
+              <div 
+                className="profile-big-avatar" 
+                style={
+                  avatarsMap[perfilActivo.id] 
+                    ? { backgroundImage: `url("${avatarsMap[perfilActivo.id]}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                    : { background: perfilActivo.color }
+                }
+              >
+                {!avatarsMap[perfilActivo.id] && obtenerIniciales(perfilActivo.nombre)}
               </div>
               <div className="profile-titles">
                 <h2>{perfilActivo.nombre}</h2>

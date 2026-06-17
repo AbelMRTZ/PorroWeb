@@ -1,5 +1,8 @@
-import { useState } from 'react'
+// src/pages/Profile.jsx
+
+import { useState, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { uploadAvatar } from '../data/usersConfig'
 import './Profile.css'
 
 function initials(nombre) {
@@ -7,7 +10,8 @@ function initials(nombre) {
 }
 
 export default function Profile() {
-  const { user, changePassword } = useAuth()
+  const { user, changePassword, updateLocalAvatar } = useAuth()
+  const fileInputRef = useRef(null)
 
   const [newPwd,  setNewPwd]  = useState('')
   const [confirm, setConfirm] = useState('')
@@ -15,6 +19,7 @@ export default function Profile() {
   const [error,   setError]   = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   function resetForm() {
     setNewPwd(''); setConfirm('')
@@ -39,19 +44,56 @@ export default function Profile() {
     }
   }
 
+  async function handleAvatarSelect(e) {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploadingAvatar(true)
+    try {
+      const url = await uploadAvatar(user.id, file)
+      updateLocalAvatar(url)
+    } catch (err) {
+      alert('Error al subir la foto de perfil: ' + err.message)
+    }
+    setUploadingAvatar(false)
+  }
+
   return (
     <div className="page">
       <div className="container profile-page">
 
-        {/* ── User card ── */}
         <div className="profile-card">
           <div className="profile-avatar-wrap" style={{ background: user.color }}>
-            <div className="profile-avatar metal-avatar" style={{ background: user.color }}>
-              <span>{initials(user.nombre)}</span>
+            <div 
+              className="profile-avatar metal-avatar" 
+              style={
+                user.avatar_url 
+                  ? { backgroundImage: `url("${user.avatar_url}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                  : { background: user.color }
+              }
+            >
+              {!user.avatar_url && <span>{initials(user.nombre)}</span>}
             </div>
           </div>
+          
           <h1 className="profile-name">{user.nombre}</h1>
           <span className="badge badge-gold profile-badge">Miembro del grupo</span>
+          
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            style={{ display: 'none' }} 
+            onChange={handleAvatarSelect} 
+          />
+          <button 
+            className="btn-secondary" 
+            style={{ marginTop: '10px', fontSize: '0.8rem', padding: '6px 12px' }}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+          >
+            {uploadingAvatar ? <><i className="fa-solid fa-spinner fa-spin"></i> Subiendo...</> : <><i className="fa-solid fa-camera"></i> Cambiar Foto</>}
+          </button>
 
           <div className="profile-info">
             <div className="profile-info-row">
@@ -65,9 +107,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ── Settings ── */}
         <div className="profile-settings">
-
           <section className="settings-card">
             <div className="settings-card-header">
               <i className="fa-solid fa-key" aria-hidden="true" />
@@ -125,7 +165,6 @@ export default function Profile() {
               </div>
             </form>
           </section>
-
         </div>
       </div>
     </div>

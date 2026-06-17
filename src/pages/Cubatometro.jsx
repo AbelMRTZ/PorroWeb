@@ -1,3 +1,5 @@
+// src/pages/Cubatometro.jsx
+
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { USERS } from '../data/usersConfig'
@@ -54,7 +56,7 @@ function buildRanking(allDrinks) {
 }
 
 export default function Cubatometro() {
-  const { user } = useAuth()
+  const { user, avatarsMap } = useAuth() // 🚀 Usamos el mapa global de fotos
   const [activeTab, setActiveTab] = useState('ranking')
   const [allDrinks, setAllDrinks] = useState([])
   const [myDrinks, setMyDrinks] = useState([])
@@ -179,8 +181,15 @@ export default function Cubatometro() {
                 {podioUsers[1] && (
                   <div className="podio-slot">
                     <div className="podio-user-info">
-                      <div className="podio-avatar" style={{ background: podioUsers[1].color }}>
-                        {podioUsers[1].nombre.slice(0, 2)}
+                      <div 
+                        className="podio-avatar" 
+                        style={
+                          avatarsMap[podioUsers[1].id] 
+                            ? { backgroundImage: `url("${avatarsMap[podioUsers[1].id]}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                            : { background: podioUsers[1].color }
+                        }
+                      >
+                        {!avatarsMap[podioUsers[1].id] && podioUsers[1].nombre.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="podio-nombre">{podioUsers[1].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[1].totalPoints).emoji}</div>
@@ -205,8 +214,15 @@ export default function Cubatometro() {
                   <div className="podio-slot">
                     <div className="podio-crown">👑</div>
                     <div className="podio-user-info">
-                      <div className="podio-avatar podio-avatar-1" style={{ background: podioUsers[0].color }}>
-                        {podioUsers[0].nombre.slice(0, 2)}
+                      <div 
+                        className="podio-avatar podio-avatar-1" 
+                        style={
+                          avatarsMap[podioUsers[0].id] 
+                            ? { backgroundImage: `url("${avatarsMap[podioUsers[0].id]}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                            : { background: podioUsers[0].color }
+                        }
+                      >
+                        {!avatarsMap[podioUsers[0].id] && podioUsers[0].nombre.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="podio-nombre">{podioUsers[0].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[0].totalPoints).emoji}</div>
@@ -230,8 +246,15 @@ export default function Cubatometro() {
                 {podioUsers[2] && (
                   <div className="podio-slot">
                     <div className="podio-user-info">
-                      <div className="podio-avatar" style={{ background: podioUsers[2].color }}>
-                        {podioUsers[2].nombre.slice(0, 2)}
+                      <div 
+                        className="podio-avatar" 
+                        style={
+                          avatarsMap[podioUsers[2].id] 
+                            ? { backgroundImage: `url("${avatarsMap[podioUsers[2].id]}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent' }
+                            : { background: podioUsers[2].color }
+                        }
+                      >
+                        {!avatarsMap[podioUsers[2].id] && podioUsers[2].nombre.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="podio-nombre">{podioUsers[2].nombre}</div>
                       <div className="podio-nivel-emoji">{getNivel(podioUsers[2].totalPoints).emoji}</div>
@@ -265,7 +288,22 @@ export default function Cubatometro() {
                     <span className="rank-pos-num">{pos}</span>
                     <div className="rank-info">
                       <div className="rank-top">
-                        <span className="rank-nombre">{entry.nombre}{isMe && <span className="rank-yo"> (tú)</span>}</span>
+                        <span className="rank-nombre">
+                          {/* 🚀 Mini avatar en lista */}
+                          <span 
+                            className="user-avatar metal-avatar" 
+                            style={{ 
+                              background: avatarsMap[entry.id] ? 'none' : entry.color,
+                              backgroundImage: avatarsMap[entry.id] ? `url(${avatarsMap[entry.id]})` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              width: '20px', height: '20px', fontSize: '0.6rem', display: 'inline-flex', marginRight: '8px', verticalAlign: 'middle' 
+                            }}
+                          >
+                            {!avatarsMap[entry.id] && <span>{entry.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
+                          </span>
+                          {entry.nombre}{isMe && <span className="rank-yo"> (tú)</span>}
+                        </span>
                         <div className="rank-right">
                           <div className="rank-drinks-mini">
                             {entry.cubata   > 0 && <span className="drink-chip chip-cubata">🥃 {entry.cubata}</span>}

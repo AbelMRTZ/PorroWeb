@@ -8,7 +8,6 @@ import { partidosFaseGrupos } from '../data/partidosMundial'
 import { USERS } from '../data/usersConfig'
 import './Porra.css'
 
-// Función para saber si un partido ya ha comenzado con reloj exacto de España
 const comprobarPartidoComenzado = (timestamp) => {
   if (!timestamp) return false
   const msPartido = new Date(timestamp).getTime()
@@ -16,7 +15,6 @@ const comprobarPartidoComenzado = (timestamp) => {
   return Date.now() >= msPartido
 }
 
-// Comprueba si han transcurrido 3 horas o más (Usado en Mi Porra y Grupo)
 const comprobarPartidoArchivado = (timestamp) => {
   if (!timestamp) return false
   const msPartido = new Date(timestamp).getTime()
@@ -25,7 +23,6 @@ const comprobarPartidoArchivado = (timestamp) => {
   return Date.now() >= (msPartido + TRES_HORAS_MS)
 }
 
-// Comprueba si han transcurrido 24 horas o más (Usado en Resumen Global)
 const comprobarPartidoArchivado24h = (timestamp) => {
   if (!timestamp) return false
   const msPartido = new Date(timestamp).getTime()
@@ -35,27 +32,23 @@ const comprobarPartidoArchivado24h = (timestamp) => {
 }
 
 export default function Porra() {
-  const { user } = useAuth()
+  const { user, avatarsMap } = useAuth() // 🚀 Usamos avatarsMap del contexto
   const [activeTab, setActiveTab] = useState('miporra')
   const [misResultados, setMisResultados] = useState({})
   const [resultadosOriginales, setResultadosOriginales] = useState({}) 
   const [loadingGuardar, setLoadingGuardar] = useState(false)
   
-  // Estados de control para los acordeones de partidos archivados
   const [archivadosOpenMiPorra, setArchivadosOpenMiPorra] = useState(false)
   const [archivadosOpenGrupo, setArchivadosOpenGrupo] = useState(false)
   const [archivadosOpenResumen, setArchivadosOpenResumen] = useState(false) 
 
-  // Estados para la clasificación
   const [clasificacion, setClasificacion] = useState([])
   const [loadingClasi, setLoadingClasi] = useState(false)
 
-  // Estados para ver a los demás
   const [miembroSeleccionado, setMiembroSeleccionado] = useState('Abel')
   const [porraOtro, setPorraOtro] = useState(null)
   const [cargandoOtro, setCargandoOtro] = useState(false)
 
-  // Estados para el resumen global
   const [pronosticosGlobales, setPronosticosGlobales] = useState({})
   const [resultadosReales, setResultadosReales] = useState({})
   const [loadingGlobal, setLoadingGlobal] = useState(false)
@@ -63,7 +56,6 @@ export default function Porra() {
   
   const miembros = USERS.map(u => u.nombre).sort()
 
-  // ── 1. CARGAR MI PORRA AL ENTRAR ──
   useEffect(() => {
     if (!user) return
     async function cargarMiPorra() {
@@ -80,14 +72,12 @@ export default function Porra() {
     cargarMiPorra()
   }, [user])
 
-  // ── 2. CARGAR CLASIFICACIÓN ──
   useEffect(() => {
     if (activeTab === 'clasificacion') {
       cargarRanking()
     }
   }, [activeTab])
 
-  // ── 3. CARGAR PORRA DE OTRO MIEMBRO ──
   useEffect(() => {
     if (activeTab === 'grupo') {
       async function cargarPorraAmigo() {
@@ -107,7 +97,6 @@ export default function Porra() {
     }
   }, [activeTab, miembroSeleccionado])
 
-  // ── 4. CARGAR RESUMEN GLOBAL Y RESULTADOS REALES ──
   useEffect(() => {
     if (activeTab === 'resumen') {
       async function cargarResumenGlobal() {
@@ -132,6 +121,7 @@ export default function Porra() {
             const userObj = USERS.find(u => u.id === p.user_id)
             if (userObj) {
               agrupados[p.partido_id].push({
+                id: userObj.id, // 🚀 Añadimos el ID para buscar su avatar
                 nombre: userObj.nombre,
                 color: userObj.color,
                 local: p.goles_local,
@@ -160,7 +150,6 @@ export default function Porra() {
     }))
   }
 
-  // ── GUARDAR Y VERIFICACIÓN DE SEGURIDAD ──
   const handleGuardarProgreso = async () => {
     setLoadingGuardar(true)
     const ahora = Date.now()
@@ -295,7 +284,6 @@ export default function Porra() {
               </button>
             </div>
 
-            {/* Sección Acordeón: Partidos Archivados (> 3h) */}
             {partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length > 0 && (
               <div className="archivados-container">
                 <button 
@@ -332,7 +320,6 @@ export default function Porra() {
               </div>
             )}
 
-            {/* Renderizado de Partidos Activos */}
             <div className="partidos-list">
               {partidosFaseGrupos
                 .filter(p => !comprobarPartidoArchivado(p.timestamp))
@@ -397,8 +384,18 @@ export default function Porra() {
                         </td>
                         <td>
                           <Link to="/perfiles" state={{ userId: userRank.id }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
-                            <span className="user-avatar metal-avatar" style={{ background: userRank.color, width: '25px', height: '25px', fontSize: '0.7rem', display: 'inline-flex', marginRight: '10px', verticalAlign: 'middle' }}>
-                              <span>{userRank.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                            {/* 🚀 Muestra la foto de avatar si la hay */}
+                            <span 
+                              className="user-avatar metal-avatar" 
+                              style={{ 
+                                background: avatarsMap[userRank.id] ? 'none' : userRank.color,
+                                backgroundImage: avatarsMap[userRank.id] ? `url(${avatarsMap[userRank.id]})` : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                width: '25px', height: '25px', fontSize: '0.7rem', display: 'inline-flex', marginRight: '10px', verticalAlign: 'middle' 
+                              }}
+                            >
+                              {!avatarsMap[userRank.id] && <span>{userRank.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
                             </span>
                             <span style={{ cursor: 'pointer' }} onMouseOver={(e) => e.target.style.color = 'var(--gold)'} onMouseOut={(e) => e.target.style.color = 'inherit'}>
                               {userRank.nombre}
@@ -437,7 +434,6 @@ export default function Porra() {
               <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Buscando en la base de datos...</p>
             ) : porraOtro ? (
               <>
-                {/* Acordeón de Archivados de los amigos */}
                 {partidosFaseGrupos.filter(p => comprobarPartidoArchivado(p.timestamp)).length > 0 && (
                   <div className="archivados-container">
                     <button 
@@ -480,7 +476,6 @@ export default function Porra() {
                   </div>
                 )}
 
-                {/* Partidos Activos de los amigos */}
                 <div className="partidos-list">
                   {partidosFaseGrupos
                     .filter(p => !comprobarPartidoArchivado(p.timestamp))
@@ -516,7 +511,7 @@ export default function Porra() {
           </div>
         )}
 
-        {/* ── 🚀 RESUMEN GLOBAL 🚀 ── */}
+        {/* ── RESUMEN GLOBAL ── */}
         {activeTab === 'resumen' && (
           <div className="tab-content">
             <div style={{ padding: '15px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', marginBottom: '25px', border: '1px dashed var(--gold)', fontSize: '0.9rem', textAlign: 'center' }}>
@@ -533,7 +528,6 @@ export default function Porra() {
               <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}><i className="fa-solid fa-spinner fa-spin"></i> Recopilando apuestas de la base de datos...</p>
             ) : (
               <>
-                {/* Acordeón de Archivados (> 24h) en Resumen Global */}
                 {partidosFaseGrupos.filter(p => comprobarPartidoArchivado24h(p.timestamp)).length > 0 && (
                   <div className="archivados-container">
                     <button 
@@ -618,8 +612,18 @@ export default function Porra() {
                                           return (
                                             <div key={idx} className="resumen-apuesta-item">
                                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
-                                                  <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                                {/* 🚀 Muestra la foto de avatar si la hay */}
+                                                <span 
+                                                  className="user-avatar metal-avatar" 
+                                                  style={{ 
+                                                    background: avatarsMap[apuesta.id] ? 'none' : apuesta.color,
+                                                    backgroundImage: avatarsMap[apuesta.id] ? `url(${avatarsMap[apuesta.id]})` : 'none',
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    width: '28px', height: '28px', fontSize: '0.7rem' 
+                                                  }}
+                                                >
+                                                  {!avatarsMap[apuesta.id] && <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
                                                 </span>
                                                 <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
                                                   {apuesta.nombre}
@@ -643,7 +647,6 @@ export default function Porra() {
                   </div>
                 )}
 
-                {/* Partidos Activos y Partidos Recientes (< 24h) en Resumen Global */}
                 <div className="partidos-list">
                   {partidosFaseGrupos
                     .filter(p => !comprobarPartidoArchivado24h(p.timestamp))
@@ -720,8 +723,18 @@ export default function Porra() {
                                     return (
                                       <div key={idx} className="resumen-apuesta-item">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                          <span className="user-avatar metal-avatar" style={{ background: apuesta.color, width: '28px', height: '28px', fontSize: '0.7rem' }}>
-                                            <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                                          {/* 🚀 Muestra la foto de avatar si la hay */}
+                                          <span 
+                                            className="user-avatar metal-avatar" 
+                                            style={{ 
+                                              background: avatarsMap[apuesta.id] ? 'none' : apuesta.color,
+                                              backgroundImage: avatarsMap[apuesta.id] ? `url(${avatarsMap[apuesta.id]})` : 'none',
+                                              backgroundSize: 'cover',
+                                              backgroundPosition: 'center',
+                                              width: '28px', height: '28px', fontSize: '0.7rem' 
+                                            }}
+                                          >
+                                            {!avatarsMap[apuesta.id] && <span>{apuesta.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
                                           </span>
                                           <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '500' }}>
                                             {apuesta.nombre}
