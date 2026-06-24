@@ -31,9 +31,8 @@ function getMonthDays(year, month) {
 }
 
 function statusColor(status) {
-  if (status === 'libre') return '#22c55e'
   if (status === 'ocupado') return '#ef4444'
-  return 'rgba(255,255,255,0.07)'
+  return '#22c55e' // libre o sin marcar → verde por defecto
 }
 
 function DayCell({ year, month, day, disponibilidades, eventos, isSelected, isToday, onSelect }) {
@@ -101,20 +100,23 @@ function MonthGrid({ year, month, disponibilidades, eventos, selectedDate, onSel
 }
 
 function StatusToggle({ label, value, onChange, disabled }) {
+  // null = libre por defecto
+  const isOcupado = value === 'ocupado'
+
   return (
     <div className="status-toggle">
       <span className="status-toggle-label">{label}</span>
       <div className="status-toggle-btns">
         <button
-          className={`status-btn libre${value === 'libre' ? ' active' : ''}`}
-          onClick={() => onChange(value === 'libre' ? null : 'libre')}
-          disabled={disabled}
+          className={`status-btn libre${!isOcupado ? ' active' : ''}`}
+          onClick={() => onChange(null)}
+          disabled={disabled || !isOcupado}
         >
           <i className="fa-solid fa-check" /> Libre
         </button>
         <button
-          className={`status-btn ocupado${value === 'ocupado' ? ' active' : ''}`}
-          onClick={() => onChange(value === 'ocupado' ? null : 'ocupado')}
+          className={`status-btn ocupado${isOcupado ? ' active' : ''}`}
+          onClick={() => onChange(isOcupado ? null : 'ocupado')}
           disabled={disabled}
         >
           <i className="fa-solid fa-xmark" /> Ocupado
@@ -242,10 +244,10 @@ function DayPanel({ date, disponibilidades, eventos, userId, onClose, onToggle, 
                 </div>
                 <span className="cumer-name">{u.nombre}</span>
                 <div className="cumer-badges">
-                  <span className={`period-badge period-badge--${s.manana ?? 'nd'}`}>
+                  <span className={`period-badge period-badge--${s.manana ?? 'libre'}`}>
                     M
                   </span>
-                  <span className={`period-badge period-badge--${s.tarde ?? 'nd'}`}>
+                  <span className={`period-badge period-badge--${s.tarde ?? 'libre'}`}>
                     T
                   </span>
                 </div>

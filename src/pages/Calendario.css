@@ -497,11 +497,6 @@
   color: #ef4444;
 }
 
-.period-badge--nd {
-  background: var(--bg-surface2);
-  border-color: var(--border);
-  color: var(--text-dim);
-}
 
 /* ─── Events section ─────────────────────────────────────────────────────── */
 .section-header-row {
