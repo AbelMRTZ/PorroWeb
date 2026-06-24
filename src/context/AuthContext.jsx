@@ -81,6 +81,7 @@ export function AuthProvider({ children }) {
 
   const isAdmin = user?.role === 'admin'
   const isGuest = user?.role === 'guest'
+  const isCumer = user?.cumer === true
 
   useEffect(() => {
     if (!user || user.role !== 'guest') {
@@ -189,7 +190,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, isAdmin, isGuest, authLoading, avatarsMap, guestPermissions,
+      user, isAdmin, isGuest, isCumer, authLoading, avatarsMap, guestPermissions,
       hasPassword, setupPassword, login, changePassword, logout, updateLocalAvatar, loginOrRegisterGuest
     }}>
       {children}

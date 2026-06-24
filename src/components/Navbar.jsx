@@ -25,7 +25,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false) 
   
   const location = useLocation()
-  const { user, isAdmin, logout } = useAuth()
+  const { user, isAdmin, isCumer, logout } = useAuth()
 
   useEffect(() => { 
     setMenuOpen(false); 
@@ -86,6 +86,15 @@ export default function Navbar() {
                   {label}
                 </NavLink>
               ))}
+              {isCumer && (
+                <NavLink
+                  to="/calendario"
+                  className={({ isActive }) => `nav-dropdown-item nav-dropdown-item--cumers${isActive ? ' active' : ''}`}
+                >
+                  <i className="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                  Calendario
+                </NavLink>
+              )}
             </div>
           </li>
 

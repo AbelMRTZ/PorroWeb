@@ -319,6 +319,16 @@
   color: var(--gold, #ffd700);
 }
 
+.nav-dropdown-item--cumers {
+  border-top: 1px solid var(--border);
+  color: var(--purple-light, #a78bfa);
+}
+
+.nav-dropdown-item--cumers:hover, .nav-dropdown-item--cumers.active {
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--purple-light, #a78bfa);
+}
+
 /* En móvil, el desplegable empuja los elementos hacia abajo en vez de flotar */
 @media (max-width: 768px) {
   .nav-dropdown-menu {

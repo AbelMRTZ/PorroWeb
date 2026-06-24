@@ -13,6 +13,8 @@ import Galeria from './pages/Galeria'
 import Admin from './pages/Admin'
 import RequireAdmin from './components/RequireAdmin'
 import RequireMember from './components/RequireMember'
+import RequireCumers from './components/RequireCumers'
+import Calendario from './pages/Calendario'
 import Contacto from './pages/Contacto'
 import Miembros from './pages/Miembros'
 import Porra from './pages/Porra'
@@ -51,6 +53,7 @@ function App() {
           <Route path="/perfiles" element={<RequireAuth><Perfiles /></RequireAuth>} />
           <Route path="/cubatometro" element={<RequireAuth><Cubatometro /></RequireAuth>} />
           <Route path="/ajuste-cuentas" element={<RequireAuth><AjusteCuentas /></RequireAuth>} />
+          <Route path="/calendario" element={<RequireCumers><Calendario /></RequireCumers>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
