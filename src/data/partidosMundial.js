@@ -77,5 +77,23 @@ export const partidosFaseGrupos = [
   { id: 69, grupo: 'K', equipoLocal: 'Colombia', equipoVisitante: 'Portugal', fecha: '28 Jun', hora: '01:30', timestamp: '2026-06-28T01:30:00+02:00', banderaLocal: '🇨🇴', banderaVisitante: '🇵🇹' },
   { id: 70, grupo: 'K', equipoLocal: 'RD Congo', equipoVisitante: 'Uzbekistán', fecha: '28 Jun', hora: '01:30', timestamp: '2026-06-28T01:30:00+02:00', banderaLocal: '🇨🇩', banderaVisitante: '🇺🇿' },
   { id: 71, grupo: 'J', equipoLocal: 'Argelia', equipoVisitante: 'Austria', fecha: '28 Jun', hora: '04:00', timestamp: '2026-06-28T04:00:00+02:00', banderaLocal: '🇩🇿', banderaVisitante: '🇦🇹' },
-  { id: 72, grupo: 'J', equipoLocal: 'Jordania', equipoVisitante: 'Argentina', fecha: '28 Jun', hora: '04:00', timestamp: '2026-06-28T04:00:00+02:00', banderaLocal: '🇯🇴', banderaVisitante: '🇦🇷' }
+  { id: 72, grupo: 'J', equipoLocal: 'Jordania', equipoVisitante: 'Argentina', fecha: '28 Jun', hora: '04:00', timestamp: '2026-06-28T04:00:00+02:00', banderaLocal: '🇯🇴', banderaVisitante: '🇦🇷' },
+
+    // ─── ELIMINATORIA DE 32 (DIECISEISAVOS DE FINAL) ───
+  { id: 73, fase: 'Eliminatoria 32', equipoLocal: 'Sudáfrica', equipoVisitante: 'Canadá', fecha: '28 Jun', hora: '21:00', timestamp: '2026-06-28T21:00:00+02:00', banderaLocal: '🇿🇦', banderaVisitante: '🇨🇦' },
+  { id: 74, fase: 'Eliminatoria 32', equipoLocal: 'Brasil', equipoVisitante: 'Japón', fecha: '29 Jun', hora: '19:00', timestamp: '2026-06-29T19:00:00+02:00', banderaLocal: '🇧🇷', banderaVisitante: '🇯🇵' },
+  { id: 75, fase: 'Eliminatoria 32', equipoLocal: 'Alemania', equipoVisitante: 'Paraguay', fecha: '29 Jun', hora: '22:30', timestamp: '2026-06-29T22:30:00+02:00', banderaLocal: '🇩🇪', banderaVisitante: '🇵🇾' },
+  { id: 76, fase: 'Eliminatoria 32', equipoLocal: 'Países Bajos', equipoVisitante: 'Marruecos', fecha: '30 Jun', hora: '03:00', timestamp: '2026-06-30T03:00:00+02:00', banderaLocal: '🇳🇱', banderaVisitante: '🇲🇦' },
+  { id: 77, fase: 'Eliminatoria 32', equipoLocal: 'Costa de Marfil', equipoVisitante: 'Noruega', fecha: '30 Jun', hora: '19:00', timestamp: '2026-06-30T19:00:00+02:00', banderaLocal: '🇨🇮', banderaVisitante: '🇳🇴' },
+  { id: 78, fase: 'Eliminatoria 32', equipoLocal: 'Francia', equipoVisitante: 'Suecia', fecha: '30 Jun', hora: '23:00', timestamp: '2026-06-30T23:00:00+02:00', banderaLocal: '🇫🇷', banderaVisitante: '🇸🇪' },
+  { id: 79, fase: 'Eliminatoria 32', equipoLocal: 'México', equipoVisitante: 'Ecuador', fecha: '1 Jul', hora: '03:00', timestamp: '2026-07-01T03:00:00+02:00', banderaLocal: '🇲🇽', banderaVisitante: '🇪🇨' },
+  { id: 80, fase: 'Eliminatoria 32', equipoLocal: 'Inglaterra', equipoVisitante: 'RD Congo', fecha: '1 Jul', hora: '18:00', timestamp: '2026-07-01T18:00:00+02:00', banderaLocal: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', banderaVisitante: '🇨🇩' },
+  { id: 81, fase: 'Eliminatoria 32', equipoLocal: 'Bélgica', equipoVisitante: 'Senegal', fecha: '1 Jul', hora: '22:00', timestamp: '2026-07-01T22:00:00+02:00', banderaLocal: '🇧🇪', banderaVisitante: '🇸🇳' },
+  { id: 82, fase: 'Eliminatoria 32', equipoLocal: 'Estados Unidos', equipoVisitante: 'Bosnia y Herzegovina', fecha: '2 Jul', hora: '02:00', timestamp: '2026-07-02T02:00:00+02:00', banderaLocal: '🇺🇸', banderaVisitante: '🇧🇦' },
+  { id: 83, fase: 'Eliminatoria 32', equipoLocal: 'España', equipoVisitante: 'Austria', fecha: '2 Jul', hora: '21:00', timestamp: '2026-07-02T21:00:00+02:00', banderaLocal: '🇪🇸', banderaVisitante: '🇦🇹' },
+  { id: 84, fase: 'Eliminatoria 32', equipoLocal: 'Portugal', equipoVisitante: 'Croacia', fecha: '3 Jul', hora: '01:00', timestamp: '2026-07-03T01:00:00+02:00', banderaLocal: '🇵🇹', banderaVisitante: '🇭🇷' },
+  { id: 85, fase: 'Eliminatoria 32', equipoLocal: 'Suiza', equipoVisitante: 'Argelia', fecha: '3 Jul', hora: '05:00', timestamp: '2026-07-03T05:00:00+02:00', banderaLocal: '🇨🇭', banderaVisitante: '🇩🇿' },
+  { id: 86, fase: 'Eliminatoria 32', equipoLocal: 'Australia', equipoVisitante: 'Egipto', fecha: '3 Jul', hora: '20:00', timestamp: '2026-07-03T20:00:00+02:00', banderaLocal: '🇦🇺', banderaVisitante: '🇪🇬' },
+  { id: 87, fase: 'Eliminatoria 32', equipoLocal: 'Argentina', equipoVisitante: 'Cabo Verde', fecha: '4 Jul', hora: '00:00', timestamp: '2026-07-04T00:00:00+02:00', banderaLocal: '🇦🇷', banderaVisitante: '🇨🇻' },
+  { id: 88, fase: 'Eliminatoria 32', equipoLocal: 'Colombia', equipoVisitante: 'Ghana', fecha: '4 Jul', hora: '03:30', timestamp: '2026-07-04T03:30:00+02:00', banderaLocal: '🇨🇴', banderaVisitante: '🇬🇭' }
 ];
