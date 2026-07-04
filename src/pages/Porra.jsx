@@ -32,6 +32,8 @@ const comprobarPartidoArchivado24h = (timestamp) => {
   return Date.now() >= (msPartido + VEINTICUATRO_HORAS_MS)
 }
 
+const etiquetaFase = (partido) => partido.fase ?? `Grupo ${partido.grupo}`
+
 export default function Porra() {
   const { user, avatarsMap } = useAuth()
   const [activeTab, setActiveTab] = useState('miporra')
@@ -333,7 +335,7 @@ export default function Porra() {
                       .map(partido => (
                         <div key={partido.id} className="partido-card" style={{ opacity: 0.65 }}>
                           <div className="partido-info">
-                            <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} • ARCHIVADO 🔒</span>
+                            <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} • ARCHIVADO 🔒</span>
                             <div className="equipos-wrap">
                               <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                               <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
@@ -360,7 +362,7 @@ export default function Porra() {
                   return (
                     <div key={partido.id} className="partido-card">
                       <div className="partido-info">
-                        <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
+                        <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒 (CERRADO)' : ''}</span>
                         <div className="equipos-wrap">
                           <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                           <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
@@ -493,7 +495,7 @@ export default function Porra() {
                             return (
                               <div key={partido.id} className="partido-card" style={{ opacity: 0.65 }}>
                                 <div className="partido-info">
-                                  <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} • FINALIZADO 🔒</span>
+                                  <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} • FINALIZADO 🔒</span>
                                   <div className="equipos-wrap">
                                     <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                                     <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
@@ -527,7 +529,7 @@ export default function Porra() {
                       return (
                         <div key={partido.id} className="partido-card">
                           <div className="partido-info">
-                            <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                            <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
                             <div className="equipos-wrap">
                               <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                               <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>vs</span>
@@ -597,7 +599,7 @@ export default function Porra() {
                               >
                                 <div className="resumen-header">
                                   <div className="partido-info">
-                                    <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} 🔒</span>
+                                    <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} a las {partido.hora} 🔒</span>
                                     <div className="equipos-wrap">
                                       <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                                       <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>
@@ -706,7 +708,7 @@ export default function Porra() {
                         >
                           <div className="resumen-header">
                             <div className="partido-info">
-                              <span className="partido-fecha">Grupo {partido.grupo} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
+                              <span className="partido-fecha">{etiquetaFase(partido)} • {partido.fecha} a las {partido.hora} {bloqueadoPorTiempo ? ' 🔒' : ''}</span>
                               <div className="equipos-wrap">
                                 <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                                 <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: '0 5px' }}>vs</span>

@@ -14,6 +14,8 @@ const comprobarPartidoArchivado = (timestamp) => {
   return Date.now() >= (msPartido + TRES_HORAS_MS)
 }
 
+const etiquetaFase = (partido) => partido.fase ?? `Grupo ${partido.grupo}`
+
 export default function AdminPorra() {
   const [resultadosReales, setResultadosReales] = useState({})
   const [loading, setLoading] = useState(false)
@@ -94,7 +96,7 @@ export default function AdminPorra() {
                   .map(partido => (
                     <div key={partido.id} className="partido-card" style={{ borderLeft: '4px solid var(--gold)', opacity: 0.8 }}>
                       <div className="partido-info">
-                        <span className="partido-fecha">Partido #{partido.id} • Grupo {partido.grupo} • FINALIZADO 🔒</span>
+                        <span className="partido-fecha">Partido #{partido.id} • {etiquetaFase(partido)} • FINALIZADO 🔒</span>
                         <div className="equipos-wrap">
                           <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                           <span style={{ color: 'var(--text-dim)' }}>vs</span>
@@ -137,7 +139,7 @@ export default function AdminPorra() {
             .map(partido => (
             <div key={partido.id} className="partido-card" style={{ borderLeft: '4px solid var(--gold)' }}>
               <div className="partido-info">
-                <span className="partido-fecha">Partido #{partido.id} • Grupo {partido.grupo}</span>
+                <span className="partido-fecha">Partido #{partido.id} • {etiquetaFase(partido)}</span>
                 <div className="equipos-wrap">
                   <span>{partido.banderaLocal} {partido.equipoLocal}</span>
                   <span style={{ color: 'var(--text-dim)' }}>vs</span>
