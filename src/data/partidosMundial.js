@@ -100,7 +100,7 @@ export const partidosFaseGrupos = [
   // ─── OCTAVOS DE FINAL ───
   { id: 89, fase: 'Octavos de Final', equipoLocal: 'Canadá', equipoVisitante: 'Marruecos', fecha: '4 Jul', hora: '19:00', timestamp: '2026-07-04T19:00:00+02:00', banderaLocal: '🇨🇦', banderaVisitante: '🇲🇦' },
   { id: 90, fase: 'Octavos de Final', equipoLocal: 'Paraguay', equipoVisitante: 'Francia', fecha: '4 Jul', hora: '23:00', timestamp: '2026-07-04T23:00:00+02:00', banderaLocal: '🇵🇾', banderaVisitante: '🇫🇷' },
-  { id: 91, fase: 'Octavos de Final', equipoLocal: 'México', equipoVisitante: 'Inglaterra', fecha: '5 Jul', hora: '20:00', timestamp: '2026-07-05T20:00:00+02:00', banderaLocal: '🇲🇽', banderaVisitante: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { id: 91, fase: 'Octavos de Final', equipoLocal: 'México', equipoVisitante: 'Inglaterra', fecha: '6 Jul', hora: '02:00', timestamp: '2026-07-06T02:00:00+02:00', banderaLocal: '🇲🇽', banderaVisitante: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
   { id: 92, fase: 'Octavos de Final', equipoLocal: 'Brasil', equipoVisitante: 'Noruega', fecha: '5 Jul', hora: '22:00', timestamp: '2026-07-05T22:00:00+02:00', banderaLocal: '🇧🇷', banderaVisitante: '🇳🇴' },
   { id: 93, fase: 'Octavos de Final', equipoLocal: 'Portugal', equipoVisitante: 'España', fecha: '6 Jul', hora: '21:00', timestamp: '2026-07-06T21:00:00+02:00', banderaLocal: '🇵🇹', banderaVisitante: '🇪🇸' },
   { id: 94, fase: 'Octavos de Final', equipoLocal: 'Estados Unidos', equipoVisitante: 'Bélgica', fecha: '7 Jul', hora: '02:00', timestamp: '2026-07-07T02:00:00+02:00', banderaLocal: '🇺🇸', banderaVisitante: '🇧🇪' },
