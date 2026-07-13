@@ -115,5 +115,5 @@ export const partidosFaseGrupos = [
 
   // ─── SEMIFINALES ───
   { id: 101, fase: 'Semifinales', equipoLocal: 'Francia', equipoVisitante: 'España', fecha: '14 Jul', hora: '21:00', timestamp: '2026-07-14T21:00:00+02:00', banderaLocal: '🇫🇷', banderaVisitante: '🇪🇸' },
-  { id: 102, fase: 'Semifinales', equipoLocal: 'Noruega', equipoVisitante: 'Argentina', fecha: '15 Jul', hora: '21:00', timestamp: '2026-07-15T21:00:00+02:00', banderaLocal: '🇳🇴', banderaVisitante: '🇦🇷' }
+  { id: 102, fase: 'Semifinales', equipoLocal: 'Inglaterra', equipoVisitante: 'Argentina', fecha: '15 Jul', hora: '21:00', timestamp: '2026-07-15T21:00:00+02:00', banderaLocal: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', banderaVisitante: '🇦🇷' }
 ];
