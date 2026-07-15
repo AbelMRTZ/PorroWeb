@@ -115,5 +115,11 @@ export const partidosFaseGrupos = [
 
   // ─── SEMIFINALES ───
   { id: 101, fase: 'Semifinales', equipoLocal: 'Francia', equipoVisitante: 'España', fecha: '14 Jul', hora: '21:00', timestamp: '2026-07-14T21:00:00+02:00', banderaLocal: '🇫🇷', banderaVisitante: '🇪🇸' },
-  { id: 102, fase: 'Semifinales', equipoLocal: 'Inglaterra', equipoVisitante: 'Argentina', fecha: '15 Jul', hora: '21:00', timestamp: '2026-07-15T21:00:00+02:00', banderaLocal: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', banderaVisitante: '🇦🇷' }
+  { id: 102, fase: 'Semifinales', equipoLocal: 'Inglaterra', equipoVisitante: 'Argentina', fecha: '15 Jul', hora: '21:00', timestamp: '2026-07-15T21:00:00+02:00', banderaLocal: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', banderaVisitante: '🇦🇷' },
+
+  // ─── TERCER PUESTO ───
+  { id: 103, fase: 'Tercer Puesto', equipoLocal: 'Francia', equipoVisitante: 'Inglaterra', fecha: '18 Jul', hora: '23:00', timestamp: '2026-07-18T23:00:00+02:00', banderaLocal: '🇫🇷', banderaVisitante: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+
+  // ─── FINAL ───
+  { id: 104, fase: 'Final', equipoLocal: 'España', equipoVisitante: 'Argentina', fecha: '19 Jul', hora: '21:00', timestamp: '2026-07-19T21:00:00+02:00', banderaLocal: '🇪🇸', banderaVisitante: '🇦🇷' }
 ];
